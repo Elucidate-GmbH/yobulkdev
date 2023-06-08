@@ -2,13 +2,41 @@ import Busboy from 'busboy';
 import Papa from 'papaparse';
 import { nameByRace } from 'fantasy-name-generator';
 import { ObjectId } from 'mongodb';
-import { Transform, pipeline } from 'stream';
+import stream, { Transform, pipeline } from 'stream';
 import StreamToMongoDB from '../../../lib/mongostream';
 import clientPromise from '../../../lib/mongodb';
 import { dataValidate, transformer } from './dataValidate';
 import { openCsvInputStream } from './papaStream';
 import { ajvCompileCustomValidator } from '../../../lib/validation_util/yovalidator';
+import fs from 'fs';
 
+async function saveFile (file, filename) {
+  const filePath = './tmpFiles/' + filename
+  var fstream = await fs.createWriteStream(filePath);
+  file.pipe(fstream);
+  fstream.on('finish', async function () {
+    await uploadFile(filePath, filename)
+  })
+}
+
+async function uploadFile(tempFilePath, filename) {
+  const { Storage } = require('@google-cloud/storage');
+  const projectId = 'elucidate-co';
+  const storage = new Storage({ projectId });
+  const destBucketName = 'efi-uploads-staging';
+
+  try {
+    await storage.bucket(destBucketName).upload(tempFilePath, { destination: `yobulk/${filename}` });
+    await deleteTempFile(tempFilePath)
+  }
+  catch (e) {
+    console.log('copy file to bucket error', e)
+  }
+}
+
+async function deleteTempFile (filePath) {
+  fs.unlinkSync(filePath);
+}
 export const config = {
   api: {
     bodyParser: false,
@@ -49,6 +77,7 @@ async function processUpload(req) {
             'file',
             async function (fieldname, file, filename, encoding, mimetype) {
               console.log('The file details are', filename, encoding, mimetype);
+              await saveFile(file, filename.filename)
 
               pipeline(
                 file,
