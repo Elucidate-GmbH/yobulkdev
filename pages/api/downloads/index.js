@@ -46,7 +46,6 @@ export default async function downloadFile(req, res) {
         });
         res.setHeader('Content-Type', 'text/csv');
         stream.on('end', function (err) {
-          console.log('---- array data ----', count);
           if (err) res.send(err);
           res.end();
         });
