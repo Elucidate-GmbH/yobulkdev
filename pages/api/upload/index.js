@@ -21,9 +21,12 @@ async function saveFile (file, filename) {
 
 async function uploadFile(tempFilePath, filename) {
   const { Storage } = require('@google-cloud/storage');
-  const projectId = 'elucidate-co';
+  const projectId = process.env.NEXT_PUBLIC_ELU_BUCKET_NAME;
+  const destBucketName = process.env.NEXT_PUBLIC_ELU_GCS_PROJECT_NAME;
+  if (!projectId || !destBucketName) {
+    return console.log('GCS project id or bucket name was not provided')
+  }
   const storage = new Storage({ projectId });
-  const destBucketName = 'efi-uploads-staging';
 
   try {
     await storage.bucket(destBucketName).upload(tempFilePath, { destination: `yobulk/${filename}` });
