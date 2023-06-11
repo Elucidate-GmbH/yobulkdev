@@ -75,7 +75,7 @@ const SassLoadMapper = () => {
   const [progress, setProgress] = useState(0);
   const [duplicate, setDuplicate] = useState(false);
 
-  const hideAi = process.env.NEXT_PUBLIC_HIDE_AI === 'true';
+  const hideAi = process.env.NEXT_PUBLIC_HIDE_AI;
 
   useEffect(() => {
     selectedTab === 0
@@ -298,7 +298,8 @@ const SassLoadMapper = () => {
                           className="ag-theme-alpine"
                           style={{
                             height:
-                              (state.curSaasLoadMapperTemplate?.length + 1) * 67 || 0,
+                              (state.curSaasLoadMapperTemplate?.length + 1) *
+                                67 || 0,
                             width: '90vw',
                             border: 'none',
                           }}
@@ -325,7 +326,7 @@ const SassLoadMapper = () => {
                         className="ag-theme-alpine"
                         style={{
                           height:
-                            (state.curSaasLoadMapperTemplate?.length + 1) * 67 || 0,
+                            (state.curSaasLoadMapperTemplate?.length + 1) * 67,
                           width: '90vw',
                           border: 'none',
                         }}
@@ -362,7 +363,7 @@ const SassLoadMapper = () => {
                   <AgGridReact
                     ref={gridRef}
                     columnDefs={columnDefs}
-                    rowData={state.curSaasLoadMapperTemplate} // from csv
+                    rowData={state.curSaasLoadMapperTemplate} // with yobulkAI prompt
                     onGridReady={onGridReady}
                     rowHeight={70}
                     suppressHorizontalScroll={true}
