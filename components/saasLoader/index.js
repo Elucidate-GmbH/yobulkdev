@@ -7,6 +7,18 @@ import { AiOutlineInfoCircle } from 'react-icons/ai';
 const SaasLoader = ({ templateId }) => {
   const { state, dispatch } = useContext(Context);
 
+  useEffect(() => {
+    function evFn (ev) {
+      dispatch({
+        type: 'SET_PARENT_ORIGIN',
+        payload: ev.origin
+      });
+    }
+    window.addEventListener('message', evFn);
+
+    return () => window.removeEventListener('message', evFn);
+  })
+
   const headers = {
     template_id: templateId,
   };
