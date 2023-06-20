@@ -10,26 +10,32 @@ import { openCsvInputStream } from './papaStream';
 import { ajvCompileCustomValidator } from '../../../lib/validation_util/yovalidator';
 import fs from 'fs';
 
+
+const destBucketName = process.env.NEXT_PUBLIC_ELU_GCS_PROJECT_NAME;
+const destination = 'yobulk/'
 async function saveFile (file, filename) {
   const filePath = './tmpFiles/' + filename
-  var fstream = await fs.createWriteStream(filePath);
-  file.pipe(fstream);
-  fstream.on('finish', async function () {
-    await uploadFile(filePath, filename)
+  await new Promise(resolve => {
+    var fstream = fs.createWriteStream(filePath);
+    file.pipe(fstream);
+    fstream.on('finish', async function () {
+      resolve()
+    })
   })
+  await uploadFile(filePath, filename)
 }
 
 async function uploadFile(tempFilePath, filename) {
   const { Storage } = require('@google-cloud/storage');
   const projectId = process.env.NEXT_PUBLIC_ELU_BUCKET_NAME;
-  const destBucketName = process.env.NEXT_PUBLIC_ELU_GCS_PROJECT_NAME;
+
   if (!projectId || !destBucketName) {
     return console.log('GCS project id or bucket name was not provided')
   }
   const storage = new Storage({ projectId });
 
   try {
-    await storage.bucket(destBucketName).upload(tempFilePath, { destination: `yobulk/${filename}` });
+    await storage.bucket(destBucketName).upload(tempFilePath, { destination: `${destination}${filename}` });
     await deleteTempFile(tempFilePath)
   }
   catch (e) {
@@ -74,12 +80,13 @@ async function processUpload(req) {
     db.collection('templates').findOne(
       { _id: ObjectId(req.headers.template_id) },
       function (err, results) {
+        let filepath = null
         if (err) throw err;
         else {
           busboy.on(
             'file',
             async function (fieldname, file, filename, encoding, mimetype) {
-              console.log('The file details are', filename, encoding, mimetype);
+              filepath = '/' + destBucketName + '/' + destination + filename.filename
               await saveFile(file, filename.filename)
 
               pipeline(
@@ -105,8 +112,7 @@ async function processUpload(req) {
                     { upsert: true }
                   )
                   .then((result, err) => {
-                    console.log('---- collection name updateded ----');
-                    //resolve(collectionName);
+                    resolve({ collection_name: collectionName, filepath });
                   })
                   .catch((err) => {
                     console.log(err);
@@ -117,8 +123,7 @@ async function processUpload(req) {
           );
         }
         busboy.on('close', function () {
-          console.log('---- Done parsing form! ----');
-          // resolve(collectionName);
+          resolve({ collection_name: collectionName, filepath });
         });
 
         var headers_changes = new Transform({
@@ -158,5 +163,6 @@ export default async function csvUploadHandler(req, res) {
     return res.status(405).end();
   }
   const returnValue = await processUpload(req);
-  res.status(200).end(JSON.stringify({ collection_name: returnValue }));
+  if (typeof returnValue === 'string') res.status(200).end(JSON.stringify({ collection_name: returnValue }));
+  else res.status(200).end(JSON.stringify(returnValue));
 }
