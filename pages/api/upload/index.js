@@ -8,11 +8,13 @@ import clientPromise from '../../../lib/mongodb';
 import { dataValidate, transformer } from './dataValidate';
 import { openCsvInputStream } from './papaStream';
 import { ajvCompileCustomValidator } from '../../../lib/validation_util/yovalidator';
+import { getSaveFileBucketName } from '../../../lib/efi-store';
 import fs from 'fs';
 
 
-const destBucketName = process.env.NEXT_PUBLIC_ELU_GCS_PROJECT_NAME;
-const destination = 'yobulk/'
+const destBucketName = getSaveFileBucketName();
+const destination = 'tmp/'
+
 async function saveFile (file, filename) {
   const filePath = './tmpFiles/' + filename
   await new Promise(resolve => {
@@ -86,7 +88,7 @@ async function processUpload(req) {
           busboy.on(
             'file',
             async function (fieldname, file, filename, encoding, mimetype) {
-              filepath = '/' + destBucketName + '/' + destination + filename.filename
+              filepath = '/' + destination + filename.filename
               await saveFile(file, filename.filename)
 
               pipeline(
