@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext, Fragment } from 'react';
-import axios from 'axios';
+import axios from '../../../lib/axios-instance';
 import { Context } from '../../../context';
 import { useRouter } from 'next/router';
 import {

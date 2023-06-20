@@ -16,7 +16,7 @@ import { InformationCircleIcon } from '@heroicons/react/24/solid';
 import CopyToClipboard from 'react-copy-to-clipboard';
 import { DocumentDuplicateIcon } from '@heroicons/react/24/outline';
 import { ChevronLeftIcon } from '@heroicons/react/24/outline';
-import axios from 'axios';
+import axios from '../../lib/axios-instance';
 
 const jsonOBJ = [
   {
