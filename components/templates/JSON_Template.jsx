@@ -7,7 +7,7 @@ import SyntaxHighlighter from 'react-syntax-highlighter';
 import { googlecode } from 'react-syntax-highlighter/dist/cjs/styles/hljs';
 import Link from 'next/link';
 import { ArrowDownTrayIcon, ArrowLeftIcon } from '@heroicons/react/24/outline';
-import axios from 'axios';
+import axios from '../../lib/axios-instance';
 import { Tab } from '@headlessui/react';
 
 function classNames(...classes) {
