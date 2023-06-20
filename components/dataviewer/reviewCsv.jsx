@@ -1,6 +1,6 @@
 import React, {useState, useCallback, useEffect, useContext} from 'react';
 import FileDownload from 'js-file-download';
-import axios from 'axios';
+import axios from '../../lib/axios-instance';
 import HappyModal from './happyModal';
 import { CloudArrowDownIcon } from '@heroicons/react/24/outline';
 import ErrorTypeDropDown from './errorTypeSelector';
@@ -9,6 +9,7 @@ import { Switch } from '@headlessui/react';
 import SuccessModal from './SuccessModal';
 import { FaMagic } from 'react-icons/fa';
 import AutoFixModal from './AutoFixModal';
+import { Context } from '../../context';
 
 const ReviewCsv = ({
   collectionName,
@@ -93,7 +94,10 @@ const ReviewCsv = ({
       setShowResultModal(true);
 
       setTimeout(() => {
-        window.top.postMessage({ eventType: "closeImporter" }, state.coEvents.origin)
+        window.top.postMessage(
+          { eventType: "closeImporter" },
+          state.efiOrigin
+        )
       }, 2000)
 
       return;
