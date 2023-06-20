@@ -1,44 +1,47 @@
-import axios from 'axios';
-import React, { useEffect, useContext } from 'react';
+import axios from '../../lib/axios-instance';
+import React, { useEffect, useContext, useState } from 'react';
 import CsvUploader from '../csvuploader';
 import { Context } from '../../context';
-import { AiOutlineInfoCircle } from 'react-icons/ai';
+import { setEfiJwt } from '../../lib/efi-jwt';
 
 const SaasLoader = ({ templateId }) => {
   const { state, dispatch } = useContext(Context);
-
-  useEffect(() => {
-    function evFn (ev) {
-      dispatch({
-        type: 'SET_PARENT_ORIGIN',
-        payload: ev.origin
-      });
-    }
-    window.addEventListener('message', evFn);
-
-    return () => window.removeEventListener('message', evFn);
-  })
 
   const headers = {
     template_id: templateId,
   };
 
   useEffect(() => {
-    axios
-      .get('/api/templates', { headers })
-      .then((result) => {
-        if (result.data.columns) {
-          dispatch({
-            type: 'SET_SASS_TEMPLATE_COLUMNS',
-            payload: result.data.columns,
-          });
-          dispatch({
-            type: 'SET_SASS_BASE_TEMPLATE_ID',
-            payload: templateId,
-          });
-        }
-      })
-      .catch((err) => console.log(err));
+    window.addEventListener('message', handleParentEvent);
+
+    function handleParentEvent (ev) {
+      console.log('EVENT FROM PARENT', ev);
+      ev.source.postMessage({ eventType: 'jwtReceived' }, ev.origin);
+
+      setEfiJwt(ev.data.jwt);
+      dispatch({ type: 'SET_EFI_ORIGIN', payload: ev.origin });
+      getTemplates();
+    }
+
+    function getTemplates () {
+      axios
+        .get('/api/templates', { headers })
+        .then((result) => {
+          if (result.data.columns) {
+            dispatch({
+              type: 'SET_SASS_TEMPLATE_COLUMNS',
+              payload: result.data.columns,
+            });
+            dispatch({
+              type: 'SET_SASS_BASE_TEMPLATE_ID',
+              payload: templateId,
+            });
+          }
+        })
+        .catch((err) => console.log(err));
+    }
+
+    return () => window.removeEventListener('message', handleParentEvent);
   }, []);
 
   return (
