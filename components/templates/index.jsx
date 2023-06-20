@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import axios from '../../lib/axios-instance';
 import { PlusIcon, TrashIcon } from '@heroicons/react/24/outline';
 
 const MainBar = () => {
