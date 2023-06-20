@@ -10,7 +10,7 @@ import { Context } from '../../context';
 import 'ag-grid-community/dist/styles/ag-grid.css';
 import 'ag-grid-community/dist/styles/ag-theme-alpine.css';
 import stringSimilarity from 'string-similarity';
-import axios from 'axios';
+import axios from '../../lib/axios-instance';
 import UploadProgress from '../uploadProgress';
 import { useRouter } from 'next/router';
 import MyModal from '../genericdialog';
@@ -119,10 +119,9 @@ const SassLoadMapper = () => {
           type: 'SET_COLLECTION_NAME',
           payload: res.data.collection_name,
         });
-
         window.top.postMessage(
           { eventType: 'uploadComplete', filepath: res.data?.filepath },
-          state.coEvents.origin
+          state.efiOrigin
         );
 
         setTimeout(() => {

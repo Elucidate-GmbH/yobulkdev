@@ -1,5 +1,5 @@
 import React, { Fragment, useEffect, useState } from 'react';
-import axios from 'axios';
+import axios from '../../lib/axios-instance';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import { InformationCircleIcon } from '@heroicons/react/24/outline';

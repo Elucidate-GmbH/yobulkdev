@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { DocumentArrowDownIcon } from '@heroicons/react/24/outline';
-import axios from 'axios';
+import axios from '../../lib/axios-instance';
 import FileDownload from 'js-file-download';
 
 const ImportsComponent = () => {
