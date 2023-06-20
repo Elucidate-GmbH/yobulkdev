@@ -119,6 +119,7 @@ const SassLoadMapper = () => {
           type: 'SET_COLLECTION_NAME',
           payload: res.data.collection_name,
         });
+
         window.top.postMessage(
           { eventType: 'uploadComplete', filepath: res.data?.filepath },
           state.efiOrigin
