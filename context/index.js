@@ -2,10 +2,12 @@ import { useReducer, createContext } from 'react';
 import { user } from './reducers/user';
 import { collection } from './reducers/collection';
 import { fileDetails } from './reducers/file-details';
+import { setCoEvents } from './reducers/crossOriginEvents';
 
 // initial state
 const initialState = {
   user: {},
+  coEvents: { origin: null, events: [] },
   collection: {},
   filePath: '',
   fileSize: 0,
@@ -31,7 +33,7 @@ const combineReducers =
 // context provider
 const Provider = ({ children }) => {
   const [state, dispatch] = useReducer(
-    combineReducers(user, collection, fileDetails),
+    combineReducers(user, collection, fileDetails, setCoEvents),
     initialState
   ); // pass more reducers combineReducers(user, blogs, products)
   const value = { state, dispatch };
