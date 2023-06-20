@@ -121,6 +121,12 @@ const SassLoadMapper = () => {
           type: 'SET_COLLECTION_NAME',
           payload: res.data.collection_name,
         });
+
+        window.top.postMessage(
+          { eventType: 'uploadComplete', filepath: res.data?.filepath },
+          state.coEvents.origin
+        );
+
         setTimeout(() => {
           router.push({ pathname: '/dataviewer/saas' }, undefined, {
             shallow: true,
