@@ -2,22 +2,10 @@ import axios from '../../lib/axios-instance';
 import React, { useEffect, useContext, useState } from 'react';
 import CsvUploader from '../csvuploader';
 import { Context } from '../../context';
-import { setEfiJwt, setSaveFileBucketName } from '../../lib/efi-store';
+import { setEfiJwt } from '../../lib/efi-jwt';
 
 const SaasLoader = ({ templateId }) => {
   const { state, dispatch } = useContext(Context);
-
-  useEffect(() => {
-    function evFn (ev) {
-      dispatch({
-        type: 'SET_PARENT_ORIGIN',
-        payload: ev.origin
-      });
-    }
-    window.addEventListener('message', evFn);
-
-    return () => window.removeEventListener('message', evFn);
-  })
 
   const headers = {
     template_id: templateId,
@@ -27,11 +15,11 @@ const SaasLoader = ({ templateId }) => {
     window.addEventListener('message', handleParentEvent);
 
     function handleParentEvent (ev) {
-      ev.source.postMessage({ eventType: 'jwtReceived', documentKey: ev.data.documentKey }, ev.origin);
+      console.log('EVENT FROM PARENT', ev);
+      ev.source.postMessage({ eventType: 'jwtReceived' }, ev.origin);
 
       setEfiJwt(ev.data.jwt);
-      setSaveFileBucketName(ev.origin);
-      dispatch({ type: 'SET_EFI_DATA', payload: { origin: ev.origin, documentKey: ev.data.documentKey } });
+      dispatch({ type: 'SET_EFI_ORIGIN', payload: ev.origin });
       getTemplates();
     }
 
