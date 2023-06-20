@@ -1,6 +1,6 @@
 import { ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 import { useState } from 'react';
-import axios from 'axios';
+import axios from '../../../lib/axios-instance';
 const InputBox = ({ columnName, val }) => {
   const [value, setValue] = useState(val);
   const [feedback, setFeedback] = useState('N/A');
