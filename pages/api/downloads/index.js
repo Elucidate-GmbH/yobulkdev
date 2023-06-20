@@ -13,7 +13,6 @@ export default async function downloadFile(req, res) {
     case 'GET':
       try {
         let count = 0;
-        console.log('---- collection ----', req.headers.collection_name);
         let collection = await db.collection(req.headers.collection_name);
         var stream = await collection
           .find({ 'validationData.0': { $exists: false } })
