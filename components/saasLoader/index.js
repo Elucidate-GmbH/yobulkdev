@@ -2,7 +2,7 @@ import axios from '../../lib/axios-instance';
 import React, { useEffect, useContext, useState } from 'react';
 import CsvUploader from '../csvuploader';
 import { Context } from '../../context';
-import { setEfiJwt } from '../../lib/efi-jwt';
+import { setEfiJwt, setSaveFileBucketName } from '../../lib/efi-store';
 
 const SaasLoader = ({ templateId }) => {
   const { state, dispatch } = useContext(Context);
@@ -19,6 +19,7 @@ const SaasLoader = ({ templateId }) => {
       ev.source.postMessage({ eventType: 'jwtReceived' }, ev.origin);
 
       setEfiJwt(ev.data.jwt);
+      setSaveFileBucketName(ev.origin);
       dispatch({ type: 'SET_EFI_ORIGIN', payload: ev.origin });
       getTemplates();
     }
