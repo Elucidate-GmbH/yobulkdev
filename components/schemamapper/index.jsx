@@ -4,7 +4,7 @@ import { Context } from '../../context';
 import 'ag-grid-community/dist/styles/ag-grid.css';
 import 'ag-grid-community/dist/styles/ag-theme-alpine.css';
 import { useRouter } from 'next/router';
-import axios from 'axios';
+import axios from '../../lib/axios-instance';
 import UploadProgress from '../uploadProgress';
 import ToggleValueRenderer from './ToggleButton';
 

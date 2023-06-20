@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios from '../../lib/axios-instance';
 import React, { useEffect, useState } from 'react';
 import SaasLoader from '../../components/saasLoader';
 
