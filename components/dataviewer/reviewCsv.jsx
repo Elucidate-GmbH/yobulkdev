@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, {useState, useCallback, useEffect, useContext} from 'react';
 import FileDownload from 'js-file-download';
 import axios from 'axios';
 import HappyModal from './happyModal';
@@ -34,6 +34,7 @@ const ReviewCsv = ({
   const [showWarning, setShowWarning] = useState(true);
   const [onlyError, setOnlyError] = useState(false);
   const [showResultModal, setShowResultModal] = useState(false);
+  const { state } = useContext(Context);
 
   const [isOpen, setIsOpen] = useState(false);
   const hideUploaderExtraButtons = process.env.NEXT_PUBLIC_HIDE_UPLOADER_BUTTONS === 'true';
@@ -90,6 +91,11 @@ const ReviewCsv = ({
       return;
     } else {
       setShowResultModal(true);
+
+      setTimeout(() => {
+        window.top.postMessage({ eventType: "closeImporter" }, state.coEvents.origin)
+      }, 2000)
+
       return;
     }
   }, [showWarning]);
