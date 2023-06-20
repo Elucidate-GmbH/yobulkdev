@@ -13,7 +13,7 @@ import 'ag-grid-community/dist/styles/ag-theme-alpine.css';
 import { ModuleRegistry } from '@ag-grid-community/core';
 import tooltip from './tooltip';
 import { Context } from '../../context';
-import axios from 'axios';
+import axios from '../../lib/axios-instance';
 import Ajv from 'ajv';
 import addFormats from 'ajv-formats';
 import Stepper from '../stepper';

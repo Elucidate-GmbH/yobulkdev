@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { TrashIcon, InformationCircleIcon } from '@heroicons/react/24/solid';
-import axios from 'axios';
+import axios from '../../lib/axios-instance';
 import SuccessModal from '../common/SuccessModal';
 
 const CollaborateComponent = () => {

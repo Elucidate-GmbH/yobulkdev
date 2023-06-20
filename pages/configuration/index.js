@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios from '../../lib/axios-instance';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import Layout from '../../layouts/Layout';
