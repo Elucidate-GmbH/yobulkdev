@@ -107,6 +107,12 @@ const ReviewCsv = ({
   const submitFirstModal = () => {
     setWarningModalVisible(false);
     setShowResultModal(true);
+    setTimeout(() => {
+      window.top.postMessage(
+        { eventType: "closeImporter" },
+        state.efiOrigin
+      )
+    }, 2000)
   };
 
   const onFinalSubmit = () => {
