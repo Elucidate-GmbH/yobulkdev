@@ -18,6 +18,7 @@ import CheckboxComponent from './CheckboxComponent';
 import { Tab } from '@headlessui/react';
 import classNames from 'classnames';
 import Link from 'next/link';
+import { getSaveFileBucketName } from '../../lib/efi-store';
 
 const columnMatcher = ({ saasTemplate, validationTemplate }) => {
   if (!saasTemplate || !validationTemplate) return;
@@ -101,7 +102,7 @@ const SassLoadMapper = () => {
 
     var options = {
       method: 'post',
-      url: '/api/upload',
+      url: `/api/upload?bucketName=${getSaveFileBucketName()}`,
       headers: {
         'Content-Type': 'multipart/form-data',
         template_id: template_id,
@@ -119,9 +120,8 @@ const SassLoadMapper = () => {
           type: 'SET_COLLECTION_NAME',
           payload: res.data.collection_name,
         });
-
         window.top.postMessage(
-          { eventType: 'uploadComplete', filepath: res.data?.filepath },
+          { eventType: 'uploadComplete', filePath: res.data?.filePath },
           state.efiOrigin
         );
 
