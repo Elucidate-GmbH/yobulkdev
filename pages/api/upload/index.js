@@ -12,50 +12,48 @@ import fs from 'fs';
 import crypto from 'crypto';
 
 
-const destination = `tmp/${generateTempPath()}/`
-let savedFilePath = null
+const bucketDestination = `tmp/${generateRandomString()}/`
+let bucketFilePath = null
 let bucketName = null
-
-function generateTempPath () {
-  return crypto.randomBytes(10).toString('base64').replace(/[=/+]/g, '')
+function tempDiskFilePath (filename) {
+  return `./tmpFiles/${filename}`;
+} 
+function generateRandomString () {
+  return crypto.randomBytes(10).toString('base64').replace(/[=/+]/g, '');
 }
 
 async function saveFile (file, filename) {
-  const fileLocation = './tmpFiles/' + filename
   await new Promise(resolve => {
-    var fstream = fs.createWriteStream(fileLocation);
+    var fstream = fs.createWriteStream(tempDiskFilePath(filename));
     file.pipe(fstream);
-    fstream.on('finish', async function () {
-      resolve()
-    })
+    fstream.on('finish', async () => resolve())
   })
-  await uploadFile(fileLocation, filename)
+  await uploadFile(filename)
 }
 
-async function uploadFile(tempFilePath, filename) {
+async function uploadFile(filename) {
   const { Storage } = require('@google-cloud/storage');
   const projectId = process.env.NEXT_PUBLIC_ELU_BUCKET_NAME;
 
   if (!projectId || !bucketName) {
-    savedFilePath = null
-    await deleteTempFile(tempFilePath)
+    bucketFilePath = null
+    await deleteTempFile(filename)
     return console.log('GCS project id or bucket name was not provided')
   }
   const storage = new Storage({ projectId });
 
   try {
-    await storage.bucket(bucketName).upload(tempFilePath, { destination: `${destination}${filename}` });
-    await deleteTempFile(tempFilePath)
+    await storage.bucket(bucketName).upload(tempDiskFilePath(filename), { destination: `${bucketDestination}${filename}` });
   }
   catch (e) {
-    savedFilePath = null
-    await deleteTempFile(tempFilePath)
+    bucketFilePath = null
+    await deleteTempFile(filename)
     console.log('copy file to bucket error', e)
   }
 }
 
-async function deleteTempFile (fileLocation) {
-  fs.unlinkSync(fileLocation);
+async function deleteTempFile (filename) {
+  fs.unlinkSync(tempDiskFilePath(filename));
 }
 export const config = {
   api: {
@@ -97,19 +95,22 @@ async function processUpload(req) {
           busboy.on(
             'file',
             async function (fieldname, file, filename, encoding, mimetype) {
-              savedFilePath = '/' + destination + filename.filename
+              bucketFilePath = '/' + bucketDestination + filename.filename
               await saveFile(file, filename.filename)
 
+              const readableStream = fs.createReadStream(tempDiskFilePath(filename.filename));
+
               pipeline(
-                file,
+                readableStream,
                 openCsvInputStream,
                 headers_changes,
                 datatype_validate,
                 dbClient.stream,
-                (err) => {
+                async (err) => {
                   if (err) {
                     console.log('Pipeline failed with an error:', err);
                   } else {
+                    await deleteTempFile(filename.filename)
                     console.log('Pipeline ended successfully');
                   }
                 }
@@ -123,19 +124,17 @@ async function processUpload(req) {
                     { upsert: true }
                   )
                   .then((result, err) => {
-                    resolve({ collection_name: collectionName, filePath: savedFilePath });
+                    resolve({ collection_name: collectionName, filePath: bucketFilePath });
                   })
                   .catch((err) => {
                     console.log(err);
-                    reject({ collection_name: collectionName, filePath: savedFilePath });
+                    reject({ collection_name: collectionName, filePath: bucketFilePath });
                   });
               });
             }
           );
         }
-        busboy.on('close', function () {
-          resolve({ collection_name: collectionName, filePath: savedFilePath });
-        });
+        busboy.on('close', () => resolve({ collection_name: collectionName, filePath: bucketFilePath }));
 
         var headers_changes = new Transform({
           readableObjectMode: true,
@@ -174,7 +173,5 @@ export default async function csvUploadHandler(req, res) {
     return res.status(405).end();
   }
   const returnValue = await processUpload(req);
-
-  if (typeof returnValue === 'string') res.status(200).end(JSON.stringify({ collection_name: returnValue }));
-  else res.status(200).end(JSON.stringify(returnValue));
+  res.status(200).end(JSON.stringify(returnValue));
 }
