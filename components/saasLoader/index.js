@@ -15,7 +15,6 @@ const SaasLoader = ({ templateId }) => {
     window.addEventListener('message', handleParentEvent);
 
     function handleParentEvent (ev) {
-      console.log('EVENT FROM PARENT', ev);
       ev.source.postMessage({ eventType: 'jwtReceived' }, ev.origin);
 
       setEfiJwt(ev.data.jwt);
