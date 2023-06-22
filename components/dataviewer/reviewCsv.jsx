@@ -175,13 +175,15 @@ const ReviewCsv = ({
         </div>
       </div>
       <div className="flex justify-flex-end gap-3">
-        {!hideUploaderExtraButtons && <button
-          onClick={getAiRecommendations}
-          className={`flex float-right bg-transparent h-8 px-2 py-1 m-2 text-sm hover:bg-blue-500 text-blue-700 font-semibold hover:text-white border border-blue-500 hover:border-transparent rounded ml-auto ${loadingSuggestions && 'text-white border-none bg-blue-200 hover:bg-blue-200'}`}
-          disabled={loadingSuggestions}
-        >
-          {loadingSuggestions ? 'Getting suggestions...' : 'Get YoBulkAI Suggestions'}
-        </button>}
+        {!hideUploaderExtraButtons &&
+          <button
+            onClick={getAiRecommendations}
+            className={`flex float-right bg-transparent h-8 px-2 py-1 m-2 text-sm hover:bg-blue-500 text-blue-700 font-semibold hover:text-white border border-blue-500 hover:border-transparent rounded ml-auto ${loadingSuggestions && 'text-white border-none bg-blue-200 hover:bg-blue-200'}`}
+            disabled={loadingSuggestions}
+          >
+            {loadingSuggestions ? 'Getting suggestions...' : 'Get YoBulkAI Suggestions'}
+          </button>}
+
         <div className="flex justify-end">
           {!hideUploaderExtraButtons &&
             <>
