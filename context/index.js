@@ -2,7 +2,7 @@ import { useReducer, createContext } from 'react';
 import { user } from './reducers/user';
 import { collection } from './reducers/collection';
 import { fileDetails } from './reducers/file-details';
-import { setEfiOrigin } from './reducers/efi';
+import { setEfiData } from './reducers/efi';
 
 // initial state
 const initialState = {
@@ -33,7 +33,7 @@ const combineReducers =
 // context provider
 const Provider = ({ children }) => {
   const [state, dispatch] = useReducer(
-    combineReducers(user, collection, fileDetails, setEfiOrigin),
+    combineReducers(user, collection, fileDetails, setEfiData),
     initialState
   ); // pass more reducers combineReducers(user, blogs, products)
   const value = { state, dispatch };
