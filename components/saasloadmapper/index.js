@@ -123,8 +123,8 @@ const SassLoadMapper = () => {
           payload: res.data.collection_name,
         });
         window.top.postMessage(
-          { eventType: 'uploadComplete', filePath: res.data?.filePath },
-          state.efiOrigin
+          { eventType: 'uploadComplete', filePath: res.data?.filePath, documentKey: state.efiData.documentKey },
+          state.efiData.origin
         );
 
         setTimeout(() => {
