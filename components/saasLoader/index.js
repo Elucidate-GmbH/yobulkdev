@@ -27,11 +27,11 @@ const SaasLoader = ({ templateId }) => {
     window.addEventListener('message', handleParentEvent);
 
     function handleParentEvent (ev) {
-      ev.source.postMessage({ eventType: 'jwtReceived' }, ev.origin);
+      ev.source.postMessage({ eventType: 'jwtReceived', documentKey: ev.data.documentKey }, ev.origin);
 
       setEfiJwt(ev.data.jwt);
       setSaveFileBucketName(ev.origin);
-      dispatch({ type: 'SET_EFI_ORIGIN', payload: ev.origin });
+      dispatch({ type: 'SET_EFI_DATA', payload: { origin: ev.origin, documentKey: ev.data.documentKey } });
       getTemplates();
     }
 
