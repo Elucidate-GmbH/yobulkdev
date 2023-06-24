@@ -92,11 +92,10 @@ const ReviewCsv = ({
       return;
     } else {
       setShowResultModal(true);
-
       setTimeout(() => {
         window.top.postMessage(
-          { eventType: "closeImporter" },
-          state.efiOrigin
+          { eventType: "closeImporter", documentKey: state.efiData.documentKey },
+          state.efiData.origin
         )
       }, 2000)
 
@@ -109,8 +108,8 @@ const ReviewCsv = ({
     setShowResultModal(true);
     setTimeout(() => {
       window.top.postMessage(
-        { eventType: "closeImporter" },
-        state.efiOrigin
+        { eventType: "closeImporter", documentKey: state.efiData.documentKey },
+        state.efiData.origin
       )
     }, 2000)
   };
