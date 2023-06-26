@@ -2,36 +2,29 @@ import axios from '../../lib/axios-instance';
 import React, { useEffect, useContext, useState } from 'react';
 import CsvUploader from '../csvuploader';
 import { Context } from '../../context';
-import { setEfiJwt, setSaveFileBucketName } from '../../lib/efi-store';
+import { setEfiJwt, setSaveFileBucketName, setEfiOrigin } from '../../lib/efi-store';
+import isInIframe from '../../lib/is-in-iframe';
 
 const SaasLoader = ({ templateId }) => {
   const { state, dispatch } = useContext(Context);
-
-  useEffect(() => {
-    function evFn (ev) {
-      dispatch({
-        type: 'SET_PARENT_ORIGIN',
-        payload: ev.origin
-      });
-    }
-    window.addEventListener('message', evFn);
-
-    return () => window.removeEventListener('message', evFn);
-  })
-
   const headers = {
     template_id: templateId,
   };
 
   useEffect(() => {
     window.addEventListener('message', handleParentEvent);
-
     function handleParentEvent (ev) {
       ev.source.postMessage({ eventType: 'jwtReceived', documentKey: ev.data.documentKey }, ev.origin);
 
       setEfiJwt(ev.data.jwt);
+      setEfiOrigin(ev.origin);
       setSaveFileBucketName(ev.origin);
       dispatch({ type: 'SET_EFI_DATA', payload: { origin: ev.origin, documentKey: ev.data.documentKey } });
+      getTemplates();
+    }
+
+    if (!isInIframe) {
+      console.log('not inside an iframe');
       getTemplates();
     }
 
@@ -39,6 +32,7 @@ const SaasLoader = ({ templateId }) => {
       axios
         .get('/api/templates', { headers })
         .then((result) => {
+          console.log('get templates result', result);
           if (result.data.columns) {
             dispatch({
               type: 'SET_SASS_TEMPLATE_COLUMNS',
