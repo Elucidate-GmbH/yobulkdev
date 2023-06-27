@@ -32,11 +32,20 @@ const SaasLoader = ({ templateId }) => {
       axios
         .get('/api/templates', { headers })
         .then((result) => {
-          console.log('get templates result', result);
           if (result.data.columns) {
             dispatch({
               type: 'SET_SASS_TEMPLATE_COLUMNS',
               payload: result.data.columns,
+            });
+            dispatch({
+              type: 'SET_SASS_BASE_TEMPLATE_ID',
+              payload: templateId,
+            });
+          }
+          else if (Array.isArray(result.data)) {
+            dispatch({
+              type: 'SET_SASS_TEMPLATE_COLUMNS',
+              payload: result.data.filter(el => el._id === templateId)[0].columns,
             });
             dispatch({
               type: 'SET_SASS_BASE_TEMPLATE_ID',
