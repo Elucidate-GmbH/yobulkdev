@@ -80,26 +80,28 @@ const GridExample = ({ version }) => {
   let recordsUri = `/api/meta/count?collection_name=${state.collection}`;
   let errorCountUri = `/api/meta/errorcount?collection_name=${state.collection}`;
 
-  const getAiRecommendations = useCallback(() => {
+  const getAiRecommendations = useCallback(async () => {
     setLoadingSuggestions(true)
-    fetch(`/api/yobulk-ai/feedback?collection=${state.collection}`)
-      .then((res) => res.json())
-      .then((data) => {
-        setFeedbackData(data.data);
-        const rowCount = gridRef.current.api.getDisplayedRowCount();
-        for (let i = 0; i < rowCount; i++) {
-          const rowNode = gridRef.current.api.getDisplayedRowAtIndex(i);
-          if (data.data[rowNode.data._id]) {
-            rowNode.setDataValue('feedback', JSON.stringify(data.data[rowNode.data._id]?.feedback || data.data[rowNode.data._id]?.Feedback));
-          }
+    try {
+      const { data } = await axios.get(`/api/yobulk-ai/feedback?collection=${state.collection}`)
+      setFeedbackData(data.data);
+      const rowCount = gridRef.current.api.getDisplayedRowCount();
+      for (let i = 0; i < rowCount; i++) {
+        const rowNode = gridRef.current.api.getDisplayedRowAtIndex(i);
+        if (data.data[rowNode.data._id]) {
+          rowNode.setDataValue('feedback', JSON.stringify(data.data[rowNode.data._id]?.feedback || data.data[rowNode.data._id]?.Feedback));
         }
-        gridRef.current.api.refreshCells({ force: true })
-        setLoadingSuggestions(false)
-      });
+      }
+      gridRef.current.api.refreshCells({ force: true })
+      setLoadingSuggestions(false)
+    }
+    catch (e) {
+
+    }
   }, [state.collection, gridRef, setLoadingSuggestions])
 
   const showOnlyErrors = useCallback(
-    (enabled) => {
+    async (enabled) => {
       setErrorFilter(enabled);
       if (enabled) {
         const dataSource = {
@@ -111,16 +113,14 @@ const GridExample = ({ version }) => {
             if (selectedErrorType && selectedErrorType != 'No selection') {
               url += `&column_name=${selectedErrorType}`;
             }
-            fetch(url)
-              .then((httpResponse) => httpResponse.json())
-              .then((response) => {
-                params.successCallback(response.data, response.data.length);
-              })
-              .catch((error) => {
-                console.error(error);
-                params.failCallback();
-              });
-          },
+            try {
+              const { data } = await axios.get(url)
+              params.successCallback(data.data, data.data.length);
+            }
+            catch (e) {
+              params.failCallback();
+            }
+          }
         };
         gridRef.current.api.setDatasource(dataSource);
       } else {
@@ -279,72 +279,74 @@ const GridExample = ({ version }) => {
   const onGridReady = useCallback(
     async (params) => {
       let countOfRecords = 0;
-      const dataSchema = () => {
+      const dataSchema = async () => {
         let schemaUrl = '/api/templates';
         const headers = {
           template_id: state.template,
         };
-
-        fetch(schemaUrl, { headers })
-          .then((httpResponse) => httpResponse.json())
-          .then((response) => {
-            templateColumns = response.columns;
-            template = response;
-            userSchema = response.schema;
-            setSchema(response.schema)
-            setColumnDefs((prev) =>
-              prev.concat(
-                templateColumns.map((x) => {
-                  return {
-                    headerName: x.label,
-                    field: x.label,
-                    editable: true,
-                    cellClassRules: cellPassRules,
-                    tooltipField: x.label,
-                    hide: false,
-                    cellRenderer: (props) => {
-                      if (props.value !== undefined) {
-                        let feedback;
-                        try {
-                          let feedbackObj = JSON.parse(props.data.feedback)
-                          if (feedbackObj) {
-                            if (Object.keys(feedbackObj).length > 0) {
-                              feedback = feedbackObj[props.colDef.headerName]
-                            }
+        try {
+          let { data } = await axios.get(schemaUrl, { headers });
+          const response = data;
+          templateColumns = response.columns;
+          template = response;
+          userSchema = response.schema;
+          setSchema(response.schema)
+          setColumnDefs((prev) =>
+            prev.concat(
+              templateColumns.map((x) => {
+                return {
+                  headerName: x.label,
+                  field: x.label,
+                  editable: true,
+                  cellClassRules: cellPassRules,
+                  tooltipField: x.label,
+                  hide: false,
+                  cellRenderer: (props) => {
+                    if (props.value !== undefined) {
+                      let feedback;
+                      try {
+                        let feedbackObj = JSON.parse(props.data.feedback)
+                        if (feedbackObj) {
+                          if (Object.keys(feedbackObj).length > 0) {
+                            feedback = feedbackObj[props.colDef.headerName]
                           }
-                        } catch (e) { }
-                        onLoadingHide();
-                        return (
-                          <span
-                            style={{
-                              display: 'flex',
-                              justifyContent: 'space-between',
-                              width: '100%',
-                            }}
-                          >
+                        }
+                      } catch (e) { }
+                      onLoadingHide();
+                      return (
+                        <span
+                          style={{
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            width: '100%',
+                          }}
+                        >
                             <span>{props.value}</span>
-                            {feedback && (
-                              <button
-                                class="text-primary transition duration-150 ease-in-out hover:text-primary-600 focus:text-primary-600 active:text-primary-700 dark:text-primary-400 dark:hover:text-primary-500 dark:focus:text-primary-500 dark:active:text-primary-600"
-                                data-te-toggle="tooltip"
-                                title={`YoBulk AI Suggestion : ${feedback}`}
-                              >
-                                <InformationCircleIcon className="w-4 h-4" />
-                              </button>
-                            )}
+                          {feedback && (
+                            <button
+                              class="text-primary transition duration-150 ease-in-out hover:text-primary-600 focus:text-primary-600 active:text-primary-700 dark:text-primary-400 dark:hover:text-primary-500 dark:focus:text-primary-500 dark:active:text-primary-600"
+                              data-te-toggle="tooltip"
+                              title={`YoBulk AI Suggestion : ${feedback}`}
+                            >
+                              <InformationCircleIcon className="w-4 h-4" />
+                            </button>
+                          )}
                           </span>
-                        );
-                      } else {
-                        return onShowLoading();
-                      }
-                    },
-                  };
-                })
-              )
-            );
-          });
+                      );
+                    } else {
+                      return onShowLoading();
+                    }
+                  },
+                };
+              })
+            )
+          );
+        }
+        catch (e) {
+
+        }
       };
-      dataSchema();
+      await dataSchema();
 
       await axios
         .get(recordsUri)
@@ -368,16 +370,14 @@ const GridExample = ({ version }) => {
         getRows: async (params) => {
           let url = `/api/meta?collection=${state.collection}&`;
           url += `_start=${params.startRow}&_end=${params.endRow}`;
-          fetch(url)
-            .then((httpResponse) => httpResponse.json())
-            .then((response) => {
-              params.successCallback(response.data, countOfRecords);
-            })
-            .catch((error) => {
-              console.error(error);
-              params.failCallback();
-            });
-        },
+          try {
+            const { data } = await axios.get(url);
+            params.successCallback(data.data, countOfRecords);
+          }
+          catch (e) {
+            params.failCallback();
+          }
+        }
       };
       params.api.setDatasource(dataSource);
       setOriginalDataSource(dataSource);
