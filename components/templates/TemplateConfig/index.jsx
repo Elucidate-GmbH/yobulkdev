@@ -48,6 +48,15 @@ const AdminComponent = ({ templateId, type }) => {
     setIsRegexMenuOpen([...newRegexMenu]);
   }
 
+  function addValidatorsToSchema (template) {
+    if (template.validators) {
+      template.validators.forEach(validator => {
+        template.schema.properties[validator.name].validate = validator.valFunc
+      })
+    }
+    return template
+  }
+
   useEffect(() => {
     const headers = {
       template_id: templateId,
@@ -56,7 +65,7 @@ const AdminComponent = ({ templateId, type }) => {
       axios
         .get('/api/templates', { headers })
         .then((res) => {
-          setTemplateData(res.data);
+          setTemplateData(addValidatorsToSchema(res.data));
         })
         .catch((err) => console.log(err));
     }
