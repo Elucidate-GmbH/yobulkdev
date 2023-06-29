@@ -19,9 +19,7 @@ function tempDiskFilePath (filename) {
   return `./tmpFiles/${filename}`;
 }
 function generateRandomString () {
-  let ret = crypto.randomBytes(10).toString('base64').replace(/[=/+]/g, '');
-  console.log('generateRandomString for bucket file', ret);
-  return ret
+  return crypto.randomBytes(10).toString('base64').replace(/[=/+]/g, '');
 
 }
 
@@ -95,7 +93,6 @@ async function processUpload(req) {
     const db = client.db(process.env.DATABASE_NAME | 'yobulk');
 
     let results;
-    console.log('req.headers.template_id', req.headers.template_id);
     try {
       results = await db.collection('templates').findOne({ _id: ObjectId(req.headers.template_id) });
       if (!results) {
@@ -109,7 +106,6 @@ async function processUpload(req) {
     busboy.on(
       'file',
       async function (fieldname, file, filename, encoding, mimetype) {
-        console.log('busboy on file, fieldname: ', fieldname, ' filename ', filename);
         bucketFilePath = '/' + bucketDestination + filename.filename
         await saveFile(file, filename.filename)
         console.log('saved file ', filename.filename, ' in ', bucketFilePath);
@@ -149,7 +145,6 @@ async function processUpload(req) {
       }
     );
     busboy.on('close', () => {
-      console.log('busboy on close');
       resolve({ collection_name: collectionName, filePath: bucketFilePath });
     });
     busboy.on('error', function(err) {
@@ -186,7 +181,6 @@ export default async function csvUploadHandler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).end();
   }
-
   const returnValue = await processUpload(req);
   console.log('~~~~~return value~~~~~', returnValue);
   res.status(200).end(JSON.stringify(returnValue));
