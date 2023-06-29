@@ -18,9 +18,10 @@ export default async function handler(req, res) {
           res.status(400).json({ error: 'Bad Request' });
           break;
         }
+        let templateColumns = schemaToColumn({ schema: JSON.parse(schema) });
         let template = schemaGenerator({ clonedSchema: JSON.parse(schema) });
         template['template_name'] = templateName;
-        template['columns'] = schemaToColumn({ schema: JSON.parse(schema) });
+        template['columns'] = templateColumns;
         let result = await db.collection('templates').insertOne(template);
         res.status(201).json(result);
       } catch (err) {
