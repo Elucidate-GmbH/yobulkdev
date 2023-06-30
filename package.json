@@ -11,9 +11,7 @@
     "dev": "next dev -p 5050",
     "build": "next build",
     "start": "next start -p 5050",
-    "lint": "next lint",
-    "predev": "node lib/seeder.js",
-    "prestart": "node lib/seeder.js"
+    "lint": "next lint"
   },
   "dependencies": {
     "@ag-grid-community/infinite-row-model": "^28.2.0",
