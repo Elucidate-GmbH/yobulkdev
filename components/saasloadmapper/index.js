@@ -167,6 +167,12 @@ const SassLoadMapper = () => {
       });
   };
 
+  const columnTypes = {
+    nonEditableColumn: {
+      editable: false
+    }
+  }
+
   const columnDefs = [
     {
       headerName: 'CSV Column',
@@ -320,6 +326,7 @@ const SassLoadMapper = () => {
                             rowSelection={'multiple'}
                             onFirstDataRendered={onFirstDataRendered}
                             components={frameworkComponents}
+                            columnTypes={columnTypes}
                           />
                         </div>
                       </div>
@@ -347,6 +354,7 @@ const SassLoadMapper = () => {
                           rowSelection={'multiple'}
                           onFirstDataRendered={onFirstDataRendered}
                           components={frameworkComponents}
+                          columnTypes={columnTypes}
                         />
                       </div>
                     </div>
@@ -376,6 +384,7 @@ const SassLoadMapper = () => {
                     rowSelection={'multiple'}
                     onFirstDataRendered={onFirstDataRendered}
                     components={frameworkComponents}
+                    columnTypes={columnTypes}
                   />
                 </div>
               </div>
