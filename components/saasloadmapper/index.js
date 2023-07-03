@@ -104,7 +104,7 @@ const SassLoadMapper = () => {
 
     var options = {
       method: 'post',
-      url: `/api/upload?bucketName=${getSaveFileBucketName()}`,
+      url: `/api/upload?bucketName=${getSaveFileBucketName()}&fileName=${target.name}`,
       headers: {
         'Content-Type': 'multipart/form-data',
         template_id: template_id,
