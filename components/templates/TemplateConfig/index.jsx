@@ -51,6 +51,9 @@ const AdminComponent = ({ templateId, type }) => {
   function addValidatorsToSchema (template) {
     if (template.validators) {
       template.validators.forEach(validator => {
+        Object.keys(template.schema.properties[validator.name]).forEach(k => {
+          if ((k.startsWith('validate_'))) delete template.schema.properties[validator.name][k]
+        })
         template.schema.properties[validator.name].validate = validator.valFunc
       })
     }
