@@ -229,7 +229,7 @@ const SassLoadMapper = () => {
     //params.api.sizeColumnsToFit();
     window.addEventListener('resize', function () {
       setTimeout(function () {
-        params.api.sizeColumnsToFit();
+        if (gridRef.current) params.api.sizeColumnsToFit();
       });
     });
 
