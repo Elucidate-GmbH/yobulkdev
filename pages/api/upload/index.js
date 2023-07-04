@@ -12,7 +12,6 @@ import fs from 'fs';
 import crypto from 'crypto';
 
 
-const _bucketDestination = `tmp/${generateRandomString()}/`
 let _bucketFilePath = null
 let _bucketName = null
 let _fileName = null;
@@ -23,7 +22,7 @@ function generateRandomString () {
   return crypto.randomBytes(10).toString('base64').replace(/[=/+]/g, '');
 }
 
-async function saveFile (file, filename) {
+async function saveFile (file, filename, _bucketDestination) {
   await new Promise(resolve => {
     if (!fs.existsSync('./tmpFiles')) {
       fs.mkdirSync('./tmpFiles', { recursive: true });
@@ -32,10 +31,10 @@ async function saveFile (file, filename) {
     file.pipe(fstream);
     fstream.on('finish', async () => resolve());
   })
-  await uploadFile(filename)
+  await uploadFile(filename, _bucketDestination)
 }
 
-async function uploadFile(filename) {
+async function uploadFile(filename, _bucketDestination) {
   const { Storage } = require('@google-cloud/storage');
   const projectId = process.env.NEXT_PUBLIC_ELU_PROJECT_NAME;
 
@@ -74,6 +73,7 @@ const dbName = process.env.DATABASE_NAME;
 
 async function processUpload(req) {
   _bucketName = req.query?.bucketName;
+  const _bucketDestination = `tmp/${generateRandomString()}/`
   _fileName = req.query?.fileName;
 
   return new Promise(async (resolve, reject) => {
@@ -105,7 +105,7 @@ async function processUpload(req) {
       'file',
       async function (fieldname, file, filename, encoding, mimetype) {
         _bucketFilePath = '/' + _bucketDestination + _fileName
-        await saveFile(file, _fileName)
+        await saveFile(file, _fileName, _bucketDestination)
         console.log('saved file ', _fileName, ' in ', _bucketFilePath);
         const readableStream = fs.createReadStream(tempDiskFilePath(_fileName));
 
