@@ -393,35 +393,22 @@ const GridExample = ({ version }) => {
   };
 
   const cellCheckBySchema = (field, value) => {
-    let flag = false;
     let error_flg = false;
-    let data = value;
-
     if (field && value) {
-      if (isNaN(value)) {
-        flag = true;
-      } else {
-        data = JSON.parse(value);
-      }
-
       let schemaProps = userSchema.properties || schema.properties;
-
       if (field in schemaProps) {
         let fieldSchema = schemaProps[field];
         let ajv = ajvCompileCustomValidator({ template });
-        let valid = ajv.validate(fieldSchema, data);
-        if (!valid) {
-          error_flg = true;
-        } else error_flg = false;
+        let valid = ajv.validate(fieldSchema, value);
+        error_flg = !valid;
       }
     }
-
     return error_flg;
   };
 
   const nullValCheckBySchema = (field, value) => {
     let nullflag = false;
-    if (field && !value) {
+    if (field && value !== undefined && !value) {
       let schemaRequired = userSchema.required;
       if (schemaRequired.length) {
         if (schemaRequired.includes(field)) nullflag = true;
