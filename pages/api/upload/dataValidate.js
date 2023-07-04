@@ -12,7 +12,7 @@ const dataValidate = ({ data, colSchema, ajv }) => {
       var obj = {};
       obj.key = errorData[i].instancePath.replace('/', '');
       obj.error_message = errorData[i].message;
-      outArray.push(obj);
+      if (colSchema.schema.required.indexOf(obj.key) > -1) outArray.push(obj);
     }
     data.validationData = outArray;
     return data;

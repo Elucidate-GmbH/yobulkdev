@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext, Fragment } from 'react';
-import axios from 'axios';
+import axios from '../../../lib/axios-instance';
 import { Context } from '../../../context';
 import { useRouter } from 'next/router';
 import {
@@ -48,6 +48,18 @@ const AdminComponent = ({ templateId, type }) => {
     setIsRegexMenuOpen([...newRegexMenu]);
   }
 
+  function addValidatorsToSchema (template) {
+    if (template.validators) {
+      template.validators.forEach(validator => {
+        Object.keys(template.schema.properties[validator.name]).forEach(k => {
+          if ((k.startsWith('validate_'))) delete template.schema.properties[validator.name][k]
+        })
+        template.schema.properties[validator.name].validate = validator.valFunc
+      })
+    }
+    return template
+  }
+
   useEffect(() => {
     const headers = {
       template_id: templateId,
@@ -56,7 +68,7 @@ const AdminComponent = ({ templateId, type }) => {
       axios
         .get('/api/templates', { headers })
         .then((res) => {
-          setTemplateData(res.data);
+          setTemplateData(addValidatorsToSchema(res.data));
         })
         .catch((err) => console.log(err));
     }

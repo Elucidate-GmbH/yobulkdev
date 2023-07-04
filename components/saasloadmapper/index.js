@@ -10,7 +10,7 @@ import { Context } from '../../context';
 import 'ag-grid-community/dist/styles/ag-grid.css';
 import 'ag-grid-community/dist/styles/ag-theme-alpine.css';
 import stringSimilarity from 'string-similarity';
-import axios from 'axios';
+import axios from '../../lib/axios-instance';
 import UploadProgress from '../uploadProgress';
 import { useRouter } from 'next/router';
 import MyModal from '../genericdialog';
@@ -18,6 +18,7 @@ import CheckboxComponent from './CheckboxComponent';
 import { Tab } from '@headlessui/react';
 import classNames from 'classnames';
 import Link from 'next/link';
+import { getSaveFileBucketName } from '../../lib/efi-store';
 
 const columnMatcher = ({ saasTemplate, validationTemplate }) => {
   if (!saasTemplate || !validationTemplate) return;
@@ -103,7 +104,7 @@ const SassLoadMapper = () => {
 
     var options = {
       method: 'post',
-      url: '/api/upload',
+      url: `/api/upload?bucketName=${getSaveFileBucketName()}&fileName=${target.name}`,
       headers: {
         'Content-Type': 'multipart/form-data',
         template_id: template_id,
@@ -121,6 +122,12 @@ const SassLoadMapper = () => {
           type: 'SET_COLLECTION_NAME',
           payload: res.data.collection_name,
         });
+
+        window.top.postMessage(
+          { eventType: 'uploadComplete', filePath: res.data?.filePath, documentKey: state.efiData.documentKey },
+          state.efiData.origin
+        );
+
         setTimeout(() => {
           router.push({ pathname: '/dataviewer/saas' }, undefined, {
             shallow: true,
@@ -160,6 +167,12 @@ const SassLoadMapper = () => {
         console.log(err);
       });
   };
+
+  const columnTypes = {
+    nonEditableColumn: {
+      editable: false
+    }
+  }
 
   const columnDefs = [
     {
@@ -216,7 +229,7 @@ const SassLoadMapper = () => {
     //params.api.sizeColumnsToFit();
     window.addEventListener('resize', function () {
       setTimeout(function () {
-        params.api.sizeColumnsToFit();
+        if (gridRef.current) params.api.sizeColumnsToFit();
       });
     });
 
@@ -314,6 +327,7 @@ const SassLoadMapper = () => {
                             rowSelection={'multiple'}
                             onFirstDataRendered={onFirstDataRendered}
                             components={frameworkComponents}
+                            columnTypes={columnTypes}
                           />
                         </div>
                       </div>
@@ -341,6 +355,7 @@ const SassLoadMapper = () => {
                           rowSelection={'multiple'}
                           onFirstDataRendered={onFirstDataRendered}
                           components={frameworkComponents}
+                          columnTypes={columnTypes}
                         />
                       </div>
                     </div>
@@ -370,6 +385,7 @@ const SassLoadMapper = () => {
                     rowSelection={'multiple'}
                     onFirstDataRendered={onFirstDataRendered}
                     components={frameworkComponents}
+                    columnTypes={columnTypes}
                   />
                 </div>
               </div>

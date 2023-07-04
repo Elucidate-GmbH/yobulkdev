@@ -4,7 +4,7 @@ import { Dialog, Transition } from '@headlessui/react';
 import Editor from '@monaco-editor/react';
 
 import Link from 'next/link';
-import axios from 'axios';
+import axios from '../../lib/axios-instance';
 
 const DemoCard = ({ item }) => {
   const [isSchemaMenuOpen, setIsSchemaMenuOpen] = useState(false);

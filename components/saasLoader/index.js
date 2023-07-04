@@ -1,32 +1,62 @@
-import axios from 'axios';
-import React, { useEffect, useContext } from 'react';
+import axios from '../../lib/axios-instance';
+import React, { useEffect, useContext, useState } from 'react';
 import CsvUploader from '../csvuploader';
 import { Context } from '../../context';
-import { AiOutlineInfoCircle } from 'react-icons/ai';
+import { setEfiJwt, setSaveFileBucketName, setEfiOrigin } from '../../lib/efi-store';
+import isInIframe from '../../lib/is-in-iframe';
 
 const SaasLoader = ({ templateId }) => {
   const { state, dispatch } = useContext(Context);
-
   const headers = {
     template_id: templateId,
   };
 
   useEffect(() => {
-    axios
-      .get('/api/templates', { headers })
-      .then((result) => {
-        if (result.data.columns) {
-          dispatch({
-            type: 'SET_SASS_TEMPLATE_COLUMNS',
-            payload: result.data.columns,
-          });
-          dispatch({
-            type: 'SET_SASS_BASE_TEMPLATE_ID',
-            payload: templateId,
-          });
-        }
-      })
-      .catch((err) => console.log(err));
+    window.addEventListener('message', handleParentEvent);
+    function handleParentEvent (ev) {
+      ev.source.postMessage({ eventType: 'jwtReceived', documentKey: ev.data.documentKey }, ev.origin);
+
+      setEfiJwt(ev.data.jwt);
+      setEfiOrigin(ev.origin);
+      setSaveFileBucketName(ev.origin);
+      dispatch({ type: 'SET_EFI_DATA', payload: { origin: ev.origin, documentKey: ev.data.documentKey } });
+      getTemplates();
+    }
+
+    if (!isInIframe) {
+      console.log('not inside an iframe');
+      getTemplates();
+    }
+
+    function getTemplates () {
+      axios
+        .get('/api/templates', { headers })
+        .then((result) => {
+          if (result.data.columns) {
+            dispatch({
+              type: 'SET_SASS_TEMPLATE_COLUMNS',
+              payload: result.data.columns,
+            });
+            dispatch({
+              type: 'SET_SASS_BASE_TEMPLATE_ID',
+              payload: templateId,
+            });
+          }
+          else if (Array.isArray(result.data)) {
+            dispatch({
+              type: 'SET_SASS_TEMPLATE_COLUMNS',
+              payload: result.data.filter(el => el._id === templateId)[0].columns,
+            });
+            dispatch({
+              type: 'SET_SASS_BASE_TEMPLATE_ID',
+              payload: templateId,
+            });
+          }
+        })
+        .catch((err) => console.log(err));
+    }
+
+    return () => window.removeEventListener('message', handleParentEvent);
   }, []);
 
   return (
