@@ -5,7 +5,6 @@ const withTM = require('next-transpile-modules')(['yoembed']); // pass the modul
 const nextConfig = {
   reactStrictMode: true,
   swcMinify: true,
-  basePath: '/uploader',
   images: {
     remotePatterns: [
       {
