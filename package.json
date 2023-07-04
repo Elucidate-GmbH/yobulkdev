@@ -11,12 +11,11 @@
     "dev": "next dev -p 5050",
     "build": "next build",
     "start": "next start -p 5050",
-    "lint": "next lint",
-    "predev": "node lib/seeder.js",
-    "prestart": "node lib/seeder.js"
+    "lint": "next lint"
   },
   "dependencies": {
     "@ag-grid-community/infinite-row-model": "^28.2.0",
+    "@google-cloud/storage": "^6.11.0",
     "@headlessui/react": "^1.7.7",
     "@heroicons/react": "^2.0.13",
     "@monaco-editor/react": "^4.4.6",
@@ -28,6 +27,7 @@
     "axios": "^0.27.2",
     "busboy": "^1.6.0",
     "classnames": "^2.3.2",
+    "crypto": "^1.0.1",
     "cuid": "^2.1.8",
     "dotenv": "^16.0.3",
     "fantasy-name-generator": "^2.0.0",

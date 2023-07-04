@@ -1,6 +1,6 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, {useState, useCallback, useEffect, useContext} from 'react';
 import FileDownload from 'js-file-download';
-import axios from 'axios';
+import axios from '../../lib/axios-instance';
 import HappyModal from './happyModal';
 import { CloudArrowDownIcon } from '@heroicons/react/24/outline';
 import ErrorTypeDropDown from './errorTypeSelector';
@@ -9,6 +9,7 @@ import { Switch } from '@headlessui/react';
 import SuccessModal from './SuccessModal';
 import { FaMagic } from 'react-icons/fa';
 import AutoFixModal from './AutoFixModal';
+import { Context } from '../../context';
 
 const ReviewCsv = ({
   collectionName,
@@ -34,6 +35,7 @@ const ReviewCsv = ({
   const [showWarning, setShowWarning] = useState(true);
   const [onlyError, setOnlyError] = useState(false);
   const [showResultModal, setShowResultModal] = useState(false);
+  const { state } = useContext(Context);
 
   const [isOpen, setIsOpen] = useState(false);
   const hideUploaderExtraButtons = process.env.NEXT_PUBLIC_HIDE_UPLOADER_BUTTONS === 'true';
@@ -90,6 +92,13 @@ const ReviewCsv = ({
       return;
     } else {
       setShowResultModal(true);
+      setTimeout(() => {
+        window.top.postMessage(
+          { eventType: "closeImporter", documentKey: state.efiData.documentKey },
+          state.efiData.origin
+        )
+      }, 2000)
+
       return;
     }
   }, [showWarning]);
@@ -100,6 +109,12 @@ const ReviewCsv = ({
   };
 
   const onFinalSubmit = () => {
+    setTimeout(() => {
+      window.top.postMessage(
+        { eventType: "closeImporter", documentKey: state.efiData.documentKey },
+        state.efiData.origin
+      )
+    }, 2000)
     setShowResultModal(false);
   };
 
@@ -159,13 +174,15 @@ const ReviewCsv = ({
         </div>
       </div>
       <div className="flex justify-flex-end gap-3">
-        {!hideUploaderExtraButtons && <button
-          onClick={getAiRecommendations}
-          className={`flex float-right bg-transparent h-8 px-2 py-1 m-2 text-sm hover:bg-blue-500 text-blue-700 font-semibold hover:text-white border border-blue-500 hover:border-transparent rounded ml-auto ${loadingSuggestions && 'text-white border-none bg-blue-200 hover:bg-blue-200'}`}
-          disabled={loadingSuggestions}
-        >
-          {loadingSuggestions ? 'Getting suggestions...' : 'Get YoBulkAI Suggestions'}
-        </button>}
+        {!hideUploaderExtraButtons &&
+          <button
+            onClick={getAiRecommendations}
+            className={`flex float-right bg-transparent h-8 px-2 py-1 m-2 text-sm hover:bg-blue-500 text-blue-700 font-semibold hover:text-white border border-blue-500 hover:border-transparent rounded ml-auto ${loadingSuggestions && 'text-white border-none bg-blue-200 hover:bg-blue-200'}`}
+            disabled={loadingSuggestions}
+          >
+            {loadingSuggestions ? 'Getting suggestions...' : 'Get YoBulkAI Suggestions'}
+          </button>}
+
         <div className="flex justify-end">
           {!hideUploaderExtraButtons &&
             <>

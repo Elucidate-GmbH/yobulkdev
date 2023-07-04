@@ -12,7 +12,7 @@ services:
   yobulk:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.dev
     command: yarn dev
     volumes:
       - .:/app
