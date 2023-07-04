@@ -12,15 +12,15 @@ import fs from 'fs';
 import crypto from 'crypto';
 
 
-const bucketDestination = `tmp/${generateRandomString()}/`
-let bucketFilePath = null
-let bucketName = null
+const _bucketDestination = `tmp/${generateRandomString()}/`
+let _bucketFilePath = null
+let _bucketName = null
+let _fileName = null;
 function tempDiskFilePath (filename) {
   return `./tmpFiles/${filename}`;
 }
 function generateRandomString () {
   return crypto.randomBytes(10).toString('base64').replace(/[=/+]/g, '');
-
 }
 
 async function saveFile (file, filename) {
@@ -30,7 +30,7 @@ async function saveFile (file, filename) {
     }
     var fstream = fs.createWriteStream(tempDiskFilePath(filename));
     file.pipe(fstream);
-    fstream.on('finish', async () => resolve())
+    fstream.on('finish', async () => resolve());
   })
   await uploadFile(filename)
 }
@@ -39,25 +39,23 @@ async function uploadFile(filename) {
   const { Storage } = require('@google-cloud/storage');
   const projectId = process.env.NEXT_PUBLIC_ELU_BUCKET_NAME;
 
-  if (!projectId || !bucketName) {
-    bucketFilePath = null
-    await deleteTempFile(filename, 'uploade file 71')
+  if (!projectId || !_bucketName) {
+    _bucketFilePath = null
+    await deleteTempFile(filename)
     return console.log('GCS project id or bucket name was not provided')
   }
   const storage = new Storage({ projectId });
   try {
-    console.log('before bucket storage', filename);
-    await storage.bucket(bucketName).upload(tempDiskFilePath(filename), { destination: `${bucketDestination}${filename}` });
+    await storage.bucket(_bucketName).upload(tempDiskFilePath(filename), { destination: `${_bucketDestination}${filename}` });
   }
   catch (e) {
-    bucketFilePath = null
-    await deleteTempFile(filename, 'upload file error')
+    _bucketFilePath = null
+    await deleteTempFile(filename)
     console.log('copy file to bucket error', e)
   }
 }
 
-async function deleteTempFile (filename, from) {
-  console.log('deleteTempFile from ', from);
+async function deleteTempFile (filename) {
   fs.unlinkSync(tempDiskFilePath(filename));
 }
 export const config = {
@@ -71,13 +69,13 @@ const papaOptions = {
   dynamicTyping: true,
   skipEmptyLines: true,
 };
-const parseStream = Papa.parse(Papa.NODE_STREAM_INPUT, papaOptions);
-
 const dbURL = process.env.MONGODB_URI;
 const dbName = process.env.DATABASE_NAME;
 
 async function processUpload(req) {
-  bucketName = req.query?.bucketName
+  _bucketName = req.query?.bucketName;
+  _fileName = req.query?.fileName;
+
   return new Promise(async (resolve, reject) => {
     const busboy = Busboy({
       headers: req.headers,
@@ -106,10 +104,10 @@ async function processUpload(req) {
     busboy.on(
       'file',
       async function (fieldname, file, filename, encoding, mimetype) {
-        bucketFilePath = '/' + bucketDestination + filename.filename
-        await saveFile(file, filename.filename)
-        console.log('saved file ', filename.filename, ' in ', bucketFilePath);
-        const readableStream = fs.createReadStream(tempDiskFilePath(filename.filename));
+        _bucketFilePath = '/' + _bucketDestination + _fileName
+        await saveFile(file, _fileName)
+        console.log('saved file ', _fileName, ' in ', _bucketFilePath);
+        const readableStream = fs.createReadStream(tempDiskFilePath(_fileName));
 
         pipeline(
           readableStream,
@@ -118,16 +116,12 @@ async function processUpload(req) {
           datatype_validate,
           dbClient.stream,
           async (err) => {
-            if (err) {
-              console.log('Pipeline failed with an error:', err);
-            } else {
-              await deleteTempFile(filename.filename, 'where its supposed to')
-              console.log('Pipeline ended successfully');
-            }
+            if (err) console.log('Pipeline failed with an error:', err);
+            else console.log('Pipeline ended successfully');
+            await deleteTempFile(_fileName)
           }
         );
         file.on('end', function () {
-          console.log('file.on end');
           db.collection('templates')
             .updateOne(
               { _id: ObjectId(req.headers.template_id) },
@@ -135,26 +129,25 @@ async function processUpload(req) {
               { upsert: true }
             )
             .then((result, err) => {
-              resolve({ collection_name: collectionName, filePath: bucketFilePath });
+              resolve({ collection_name: collectionName, filePath: _bucketFilePath });
             })
             .catch((err) => {
-              console.log(err);
-              reject({ collection_name: collectionName, filePath: bucketFilePath });
+              console.log('file on end error ', err);
+              reject({ collection_name: collectionName, filePath: _bucketFilePath });
             });
         });
       }
     );
     busboy.on('close', () => {
-      resolve({ collection_name: collectionName, filePath: bucketFilePath });
+      resolve({ collection_name: collectionName, filePath: _bucketFilePath });
     });
-    busboy.on('error', function(err) {
-      console.log('Error in busboy:', err);
-    });
+    busboy.on('error', err => console.log('Error in busboy:', err));
 
     var headers_changes = new Transform({
       readableObjectMode: true,
       writableObjectMode: true,
     });
+
     headers_changes._transform = async function (data, enc, cb) {
       var newdata = await transformer({
         data,
@@ -163,6 +156,7 @@ async function processUpload(req) {
       headers_changes.push(newdata);
       cb();
     };
+
     var datatype_validate = new Transform({
       readableObjectMode: true,
       writableObjectMode: true,
@@ -173,6 +167,7 @@ async function processUpload(req) {
       datatype_validate.push(newdata);
       cb();
     };
+
     req.pipe(busboy);
   });
 }
@@ -182,6 +177,5 @@ export default async function csvUploadHandler(req, res) {
     return res.status(405).end();
   }
   const returnValue = await processUpload(req);
-  console.log('~~~~~return value~~~~~', returnValue);
   res.status(200).end(JSON.stringify(returnValue));
 }
