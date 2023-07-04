@@ -37,7 +37,7 @@ async function saveFile (file, filename) {
 
 async function uploadFile(filename) {
   const { Storage } = require('@google-cloud/storage');
-  const projectId = process.env.NEXT_PUBLIC_ELU_BUCKET_NAME;
+  const projectId = process.env.NEXT_PUBLIC_ELU_PROJECT_NAME;
 
   if (!projectId || !_bucketName) {
     _bucketFilePath = null
