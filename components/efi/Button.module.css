@@ -1,0 +1,133 @@
+/* .button.module.css */
+
+.btn {
+    @apply flex justify-center items-center gap-2.5;
+    @apply text-base font-medium whitespace-nowrap;
+    @apply cursor-pointer;
+    @apply border;
+    @apply rounded-md;
+    @apply py-2 px-4;
+    @apply shadow;
+}
+
+.btn:disabled {
+    @apply cursor-not-allowed;
+}
+
+.btn.full {
+    @apply flex-grow;
+}
+
+.btn.primary {
+    @apply bg-blue-800;
+    @apply border-blue-800;
+    @apply text-white;
+}
+
+.btn.primary:hover {
+    @apply bg-blue-700;
+    @apply border-blue-700;
+}
+
+.btn.primary:disabled {
+    @apply bg-gray-500;
+    @apply border-gray-500;
+}
+
+.btn.secondary {
+    @apply bg-white;
+    @apply border-blue-800;
+    @apply text-blue-800;
+}
+
+.btn.secondary:hover {
+    @apply bg-blue-100;
+    @apply text-blue-700;
+    @apply border-blue-700;
+}
+
+.btn.secondary:disabled {
+    @apply text-gray-500;
+    @apply border-gray-500;
+}
+
+.btn.subtle {
+    @apply gap-2;
+    @apply bg-transparent;
+    @apply border-transparent;
+    @apply text-blue-800;
+    @apply shadow-none;
+}
+
+.btn.subtle:hover:not(:disabled) {
+    @apply bg-blue-100;
+    @apply border-blue-100;
+}
+
+.btn.subtle:disabled {
+    @apply text-gray-500;
+}
+
+.btn.subtle svg[data-prefix="fal"] {
+    @apply text-lg;
+}
+
+.btn.positive {
+    @apply bg-emerald-800;
+    @apply border-emerald-800;
+    @apply text-white;
+}
+
+.btn.positive:hover {
+    @apply bg-emerald-700;
+    @apply border-emerald-700;
+}
+
+.btn.positive:disabled {
+    @apply bg-gray-500;
+    @apply border-gray-500;
+}
+
+.btn.positive-subtle {
+    @apply bg-transparent;
+    @apply border-transparent;
+    @apply text-emerald-800;
+    @apply shadow-none;
+}
+
+.btn.positive-subtle:hover:not(:disabled) {
+    @apply bg-emerald-100;
+    @apply border-emerald-100;
+}
+
+.btn.negative {
+    @apply bg-red-800;
+    @apply border-red-800;
+    @apply text-white;
+}
+
+.btn.negative:hover {
+    @apply bg-red-700;
+    @apply border-red-700;
+}
+
+.btn.negative:disabled {
+    @apply bg-gray-500;
+    @apply border-gray-500;
+}
+
+.btn.negative-subtle {
+    @apply bg-transparent;
+    @apply border-transparent;
+    @apply text-red-800;
+    @apply shadow-none;
+}
+
+.btn.negative-subtle:hover:not(:disabled) {
+    @apply bg-red-100;
+    @apply border-red-100;
+}
+
+.btn.negative-subtle:disabled {
+    @apply text-gray-500;
+}
