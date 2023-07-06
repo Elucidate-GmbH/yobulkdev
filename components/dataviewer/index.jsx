@@ -300,6 +300,7 @@ const GridExample = ({ version }) => {
                   editable: true,
                   cellClassRules: cellPassRules,
                   tooltipField: x.label,
+                  minWidth: 200,
                   hide: false,
                   cellRenderer: (props) => {
                     if (props.value !== undefined) {
@@ -480,7 +481,6 @@ const GridExample = ({ version }) => {
   return (
     <>
       {version === 'norm' && <Stepper step={4} />}
-      {isErrorFree && <Confetti />}
       <div className="grid grid-cols-1 gap-10">
         <ReviewCsv
           collectionName={state.collection}

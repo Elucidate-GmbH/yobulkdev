@@ -5,9 +5,11 @@ import { Context } from '../../context';
 import Papa from 'papaparse';
 import { useRouter } from 'next/router';
 import Stepper from '../stepper';
+import Button from '../efi/Button';
+import { ButtonTypes } from '../efi/ButtonTypes';
 
 const CsvUploader = ({ isStepperVisible, nextPageRoute }) => {
-  const { dispatch } = useContext(Context);
+  const { state, dispatch } = useContext(Context);
   const router = useRouter();
 
   const onDrop = useCallback(
@@ -58,7 +60,7 @@ const CsvUploader = ({ isStepperVisible, nextPageRoute }) => {
       'text/csv': ['.csv'],
     },
     maxFiles: 1,
-    noClick: true,
+    noClick: !state.efiData.isMobile,
     noKeyboard: true,
     onDrop,
   });
@@ -68,26 +70,23 @@ const CsvUploader = ({ isStepperVisible, nextPageRoute }) => {
       {isStepperVisible && <Stepper step={1} />}
       <div className="flex justify-center ">
         <div className="dropzone bg-white">
-          <p className="text-lg font-bold text-gray-500">Upload your CSV</p>
-          <p className="text-md text-gray-500">
-            The file should be in{' '}
-            <span className="text-red-500 text-lg font-semibold">.csv</span>{' '}
-            format. First row should be the headers.
-          </p>
-          <div {...getRootProps()} className="drag_drop_wrapper">
+          {!state.efiData.isMobile && <p className='text-lg font-bold text-gray-500'>Upload your CSV</p>}
+            <div {...getRootProps()} className='drag_drop_wrapper'>
             <input hidden {...getInputProps()} />
-            <CloudArrowUpIcon className="w-16 h-16 text-blue-200" />
+            <CloudArrowUpIcon className='w-16 h-16 text-blue-200' />
             {isDragActive ? (
               <p>Drop the csv here...</p>
             ) : (
-              <p className="text-gray-500">Drag & Drop your csv here</p>
+              <p className='text-gray-500'>{!state.efiData.isMobile ? 'Drag & Drop' : 'Upload'} your csv here</p>
             )}
           </div>
-          <p className="text-gray-500">Or</p>
+          {!state.efiData.isMobile && <p className='text-gray-500'>Or</p>}
           <div className="flex w-full justify-center">
-            <button onClick={open} className="dropzone_button">
+            <Button
+              onClick={open}
+              type={!state.efiData.isMobile ? ButtonTypes.subtle : ButtonTypes.primary}>
               Choose a file
-            </button>
+            </Button>
           </div>
         </div>
       </div>
