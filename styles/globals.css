@@ -6,8 +6,7 @@ html,
 body {
   padding: 0;
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen,
-    Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
+  font-family: 'Barlow', sans-serif;
 }
 
 a {
@@ -24,7 +23,7 @@ a {
 }
 
 .dropzone {
-  @apply w-full md:w-3/4 lg:w-2/5 p-6 space-y-3 text-center rounded overflow-hidden shadow-lg;
+  @apply w-full md:w-3/4 p-6 space-y-3 text-center rounded overflow-hidden shadow-lg;
 }
 
 .drag_drop_wrapper {
@@ -132,4 +131,8 @@ a {
   font-size: 15px;
   font-weight: 900;
   z-index: -1; /* this will set it in background so when user click onit you will get cell-click event as if user would normally click on cell */
+}
+
+.ag-body-viewport {
+  overflow: hidden!important;
 }

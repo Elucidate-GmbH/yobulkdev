@@ -10,6 +10,8 @@ import SuccessModal from './SuccessModal';
 import { FaMagic } from 'react-icons/fa';
 import AutoFixModal from './AutoFixModal';
 import { Context } from '../../context';
+import Button from '../efi/Button';
+import { ButtonTypes } from '../efi/ButtonTypes';
 
 const ReviewCsv = ({
   collectionName,
@@ -92,13 +94,6 @@ const ReviewCsv = ({
       return;
     } else {
       setShowResultModal(true);
-      setTimeout(() => {
-        window.top.postMessage(
-          { eventType: "closeImporter", documentKey: state.efiData.documentKey },
-          state.efiData.origin
-        )
-      }, 2000)
-
       return;
     }
   }, [showWarning]);
@@ -114,7 +109,7 @@ const ReviewCsv = ({
         { eventType: "closeImporter", documentKey: state.efiData.documentKey },
         state.efiData.origin
       )
-    }, 2000)
+    }, 500)
     setShowResultModal(false);
   };
 
@@ -124,15 +119,15 @@ const ReviewCsv = ({
   };
 
   return (
-    <div className="flex flex-nowrap justify-between">
-      <div className="flex float-left gap-6">
-        <div className="flex-auto w-auto text-gray-500 font-semibold p-2">
+    <div className="flex flex-nowrap justify-between relative flex-col lg:flex-row">
+      <div className="flex float-left gap-5 flex-wrap lg:flex-nowrap">
+        <div className="flex-auto w-auto text-gray-900 p-2">
           All Rows{' '}
           <span className="text-xs ml-1 inline-flex items-center font-bold leading-sm uppercase px-3 py-1 bg-blue-200 text-blue-700 rounded-full">
-            {metaData ? metaData.totalRecords / 1000 : 0}k
+            {metaData && metaData.totalRecords ? metaData.totalRecords < 1000 ? metaData.totalRecords : metaData.totalRecords / 1000 + 'k' : 0}
           </span>
         </div>
-        <div className="flex-auto w-auto text-gray-500 font-semibold p-2">
+        <div className="flex-auto w-auto text-gray-900 p-2">
           Valid Rows
           <span className="text-xs ml-2 inline-flex items-center font-bold leading-sm uppercase px-3 py-1 bg-green-200 text-gray-600 rounded-full">
             {metaData && typeof metaData.validRecords !== 'undefined'
@@ -140,7 +135,7 @@ const ReviewCsv = ({
               : 'Loading...'}
           </span>
         </div>{' '}
-        <div className="flex-auto w-auto text-red-600 font-semiboldmb-2 p-2">
+        <div className="flex-auto w-auto text-red-600 p-2">
           Error Rows
           <span className="text-xs ml-2 inline-flex items-center font-bold leading-sm uppercase px-3 py-1 bg-red-600 text-white rounded-full">
             {metaData && typeof metaData.validRecords !== 'undefined'
@@ -148,7 +143,7 @@ const ReviewCsv = ({
               : 'Loading...'}
           </span>
         </div>{' '}
-        <div className="flex items-center w-auto text-gray-500 font-semibold mb-1">
+        <div className="flex items-center w-auto text-gray-900 mb-1">
           Only Errors
           <Switch
             checked={onlyError}
@@ -166,14 +161,14 @@ const ReviewCsv = ({
             </div>
           </Switch>
         </div>{' '}
-        <div className="flex-auto w-auto font-semibold">
+        <div className="flex-auto w-auto">
           <ErrorTypeDropDown
             errData={metaData}
             selectErrorType={selectErrorType}
           />
         </div>
       </div>
-      <div className="flex justify-flex-end gap-3">
+      <div className="flex justify-flex-end gap-3 mt-12 lg:mt-0">
         {!hideUploaderExtraButtons &&
           <button
             onClick={getAiRecommendations}
@@ -216,13 +211,11 @@ const ReviewCsv = ({
 
           {!downloadig ? (
             <>
-              <button
+              <Button
                 onClick={() => onBtnExport(false)}
-                className="flex float-right bg-transparent h-8 px-2 py-1 m-2 text-sm hover:bg-blue-500 text-blue-700 font-semibold hover:text-white   border border-blue-500 hover:border-transparent rounded"
-              >
-                <CloudArrowDownIcon className="w-5 mr-1" />
+                type={ButtonTypes.subtle}>
                 Download
-              </button>
+              </Button>
             </>
           ) : (
             <div className="animate-bounce bg-white dark:bg-slate-800 p-2 w-10 h-10 ring-1 ring-slate-900/5 dark:ring-slate-200/20 shadow-lg rounded-full flex items-center justify-center">
@@ -239,12 +232,13 @@ const ReviewCsv = ({
               </svg>
             </div>
           )}
-          <button
+          <Button
             onClick={() => onBtnSubmit()}
-            className="flex float-right bg-transparent h-8 px-2 py-1 m-2 text-sm hover:bg-blue-500 text-blue-700 font-semibold hover:text-white   border border-blue-500 hover:border-transparent rounded"
+            type={ButtonTypes.primary}
+            customStyle={{ marginLeft: '10px' }}
           >
             Submit
-          </button>
+          </Button>
         </div>
 
         {showResultModal && (

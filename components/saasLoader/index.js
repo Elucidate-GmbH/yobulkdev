@@ -4,8 +4,10 @@ import CsvUploader from '../csvuploader';
 import { Context } from '../../context';
 import { setEfiJwt, setSaveFileBucketName, setEfiOrigin } from '../../lib/efi-store';
 import isInIframe from '../../lib/is-in-iframe';
+import Spinner from '../efi/Spinner';
 
 const SaasLoader = ({ templateId }) => {
+  const [isLoading, setIsLoading] = useState(true)
   const { state, dispatch } = useContext(Context);
   const headers = {
     template_id: templateId,
@@ -19,7 +21,14 @@ const SaasLoader = ({ templateId }) => {
       setEfiJwt(ev.data.jwt);
       setEfiOrigin(ev.origin);
       setSaveFileBucketName(ev.origin);
-      dispatch({ type: 'SET_EFI_DATA', payload: { origin: ev.origin, documentKey: ev.data.documentKey } });
+      dispatch({
+        type: 'SET_EFI_DATA',
+        payload: {
+          origin: ev.origin,
+          documentKey: ev.data.documentKey,
+          isMobile: ev.data.isMobile
+        }
+      });
       getTemplates();
     }
 
@@ -52,23 +61,35 @@ const SaasLoader = ({ templateId }) => {
               payload: templateId,
             });
           }
+          setIsLoading(false)
         })
-        .catch((err) => console.log(err));
+        .catch((err) => {
+          setIsLoading(false)
+          console.log(err);
+        });
     }
 
     return () => window.removeEventListener('message', handleParentEvent);
   }, []);
 
+  if (isLoading) {
+    return (
+      <div className='h-screen w-screen relative'>
+        <Spinner />;
+      </div>
+    )
+  }
+
   return (
     <div className='dark:bg-gray-800 h-screen'>
-      <div className="flex mx-20 items-center">
+      <div className="flex lg:mx-20 flex-col lg:flex-row">
         <div className="w-72 p-4 rounded dark:bg-gray-900">
-          <div className="flex mb-4 rounded bg-blue-500/25 dark:bg-gray-800 p-2">
+          <div className="flex mb-4 dark:bg-gray-800">
             <p className="text-sm text-gray-500 dark:text-gray-200">
               Make sure your file includes the following required columns:
             </p>
           </div>
-          <p className="text-md uppercase font-bold text-gray-700 dark:text-gray-200">
+          <p className="text-md uppercase font-bold dark:text-gray-200 text-blue-800">
             Expected Columns
           </p>
           <hr className="my-2" />

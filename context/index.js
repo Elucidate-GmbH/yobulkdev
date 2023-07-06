@@ -7,7 +7,7 @@ import { setEfiData } from './reducers/efi';
 // initial state
 const initialState = {
   user: {},
-  efiData: { origin: null, documentKey: null },
+  efiData: { origin: null, documentKey: null, isMobile: null },
   collection: {},
   filePath: '',
   fileSize: 0,
