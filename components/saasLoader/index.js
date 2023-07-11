@@ -75,7 +75,7 @@ const SaasLoader = ({ templateId }) => {
   if (isLoading) {
     return (
       <div className='h-screen w-screen relative'>
-        <Spinner />;
+        <Spinner />
       </div>
     )
   }
