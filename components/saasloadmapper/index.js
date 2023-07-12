@@ -122,7 +122,11 @@ const SassLoadMapper = () => {
       .then((res) => {
         dispatch({
           type: 'SET_COLLECTION_NAME',
-          payload: res.data.collection_name,
+          payload: res.data.collection_name
+        });
+        dispatch({
+          type: 'SET_TASK_ID',
+          payload: res.data.taskId
         });
 
         window.top.postMessage(
@@ -394,7 +398,7 @@ const SassLoadMapper = () => {
         <MyModal
           title={'Duplicates!'}
           description={
-            'Please check the Labels in Red Colored. Those are duplicated.'
+            'Please check the red labels. They are duplicated.'
           }
           isVisible={duplicate}
           setIsvisible={setDuplicate}

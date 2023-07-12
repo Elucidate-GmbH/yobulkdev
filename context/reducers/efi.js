@@ -9,6 +9,8 @@ export function setEfiData(state, action) {
           isMobile: action.payload.isMobile
         }
       };
+    case 'SET_TASK_ID':
+      return { ...state, taskId: action.payload }
     default:
       return state;
   }

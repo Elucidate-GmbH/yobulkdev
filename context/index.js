@@ -9,6 +9,7 @@ const initialState = {
   user: {},
   efiData: { origin: null, documentKey: null, isMobile: null },
   collection: {},
+  taskId: null,
   filePath: '',
   fileSize: 0,
   sourceFileHeaders: [],
