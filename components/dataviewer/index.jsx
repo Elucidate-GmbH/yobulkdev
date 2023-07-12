@@ -35,6 +35,7 @@ import ReviewCsv from './reviewCsv';
 import Confetti from '../confetti';
 import { ajvCompileCustomValidator } from '../../lib/validation_util/yovalidator';
 import { InformationCircleIcon } from '@heroicons/react/24/solid';
+import Spinner from '../efi/Spinner';
 
 ModuleRegistry.registerModules([InfiniteRowModelModule]);
 
@@ -72,8 +73,10 @@ const GridExample = ({ version }) => {
   const [loadingSuggestions, setLoadingSuggestions] = useState(false);
   const [autofixValues, setAutofixValues] = useState([]);
   const [changedRowsIndex, setChangedRowsIndex] = useState([]);
-  const [schema, setSchema] = useState({})
-  const [autofixedlabels, setautofixedLabels] = useState([])
+  const [schema, setSchema] = useState({});
+  const [autofixedlabels, setautofixedLabels] = useState([]);
+  const [taskIsLoading, setTaskIsLoading] = useState(true);
+
   let templateColumns = [];
   let template = {};
   let userSchema = {};
@@ -240,6 +243,30 @@ const GridExample = ({ version }) => {
     }
   }
 
+  const [time, setTime] = useState(0);
+  let interval = useRef();
+  let timerInterval = useRef();
+
+  useEffect(() => {
+    interval.current = setInterval(async () => {
+      const { data } = await axios.get(`/api/meta/task?taskId=${state.taskId}`)
+      if (data.status === 'completed') {
+        clearInterval(interval.current);
+        clearInterval(timerInterval.current);
+        setTaskIsLoading(false);
+      }
+    }, 10000);
+
+    timerInterval.current = setInterval(() => {
+      setTime(val => val + 1);
+    }, 1000);
+
+    return () => {
+      clearInterval(interval.current);
+      clearInterval(timerInterval.current);
+    }
+  }, [])
+
   useEffect(() => {
     if (!selectedErrorType) return;
     let currentColumnDefs = gridRef?.current?.api?.getColumnDefs();
@@ -353,7 +380,6 @@ const GridExample = ({ version }) => {
         .get(recordsUri)
         .then((res) => {
           setFileMetaData(res.data);
-
           countOfRecords = res.data.totalRecords;
           axios
             .get(errorCountUri)
@@ -477,6 +503,27 @@ const GridExample = ({ version }) => {
       }
     }
   }, []);
+
+  const minutes = Math.floor(time / 60);
+  const seconds = time % 60;
+
+  if (taskIsLoading) {
+    return (
+      <div className='h-screen w-screen relative'>
+        <p className='text-sm text-center'>Please wait while we retrieve the data and insert it into a table. This could take a a few minutes, depending on the size of the file.</p>
+        <p className='text-sm text-center'>Please do not close the window or the uploader.</p>
+        <div className='my-4'>
+          <p className='text-sm text-center'>500mb file - approx 30 seconds</p>
+          <p className='text-sm text-center'>3.5gb file - approx 6 minutes</p>
+        </div>
+        <div className='text-sm flex flex-col items-center justify-center'>
+          <p>Elapsed Time:</p>
+          <p>{minutes.toString().padStart(2, '0')}:{seconds.toString().padStart(2, '0')}</p>
+        </div>
+        <Spinner />
+      </div>
+    )
+  }
 
   return (
     <>
