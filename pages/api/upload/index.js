@@ -15,6 +15,7 @@ import crypto from 'crypto';
 let _bucketFilePath = null
 let _bucketName = null
 let _fileName = null;
+let taskId = null;
 function tempDiskFilePath (filename) {
   return `./tmpFiles/${filename}`;
 }
@@ -117,7 +118,21 @@ async function processUpload(req) {
           dbClient.stream,
           async (err) => {
             if (err) console.log('Pipeline failed with an error:', err);
-            else console.log('Pipeline ended successfully');
+            else {
+              try {
+                let result = await db
+                  .collection('tasks')
+                  .updateOne(
+                    { _id: ObjectId(taskId) },
+                    { $set: { 'status': 'completed' } },
+                    { upsert: false }
+                  );
+                console.log('Pipeline ended successfully');
+              }
+              catch (e) {
+                console.log('error update task to completed');
+              }
+            }
             await deleteTempFile(_fileName)
           }
         );
@@ -128,18 +143,15 @@ async function processUpload(req) {
               { $set: { collection_name: collectionName } },
               { upsert: true }
             )
-            .then((result, err) => {
-              resolve({ collection_name: collectionName, filePath: _bucketFilePath });
-            })
-            .catch((err) => {
-              console.log('file on end error ', err);
-              reject({ collection_name: collectionName, filePath: _bucketFilePath });
-            });
+            .then((result, err) => console.log('file finished inserting in db'))
+            .catch((err) => console.log('file on end error ', err))
         });
       }
     );
-    busboy.on('close', () => {
-      resolve({ collection_name: collectionName, filePath: _bucketFilePath });
+    busboy.on('close', async () => {
+      const resp = await db.collection('tasks').insertOne({ status: 'queued' });
+      taskId = resp.insertedId.toString();
+      resolve({ collection_name: collectionName, filePath: _bucketFilePath, taskId: resp.insertedId.toString() });
     });
     busboy.on('error', err => console.log('Error in busboy:', err));
 
