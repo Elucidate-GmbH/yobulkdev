@@ -119,15 +119,23 @@ const ReviewCsv = ({
   };
 
   return (
-    <div className="flex flex-nowrap justify-between relative flex-col lg:flex-row">
+    <div className="flex flex-nowrap justify-between flex-col lg:flex-row">
       <div className="flex float-left gap-5 flex-wrap lg:flex-nowrap">
-        <div className="flex-auto w-auto text-gray-900 p-2">
+        <div className="flex-auto w-auto text-gray-900 p-2 flex flex-wrap items-center justify-center">
           All Rows{' '}
           <span className="text-xs ml-1 inline-flex items-center font-bold leading-sm uppercase px-3 py-1 bg-blue-200 text-blue-700 rounded-full">
-            {metaData && metaData.totalRecords ? metaData.totalRecords < 1000 ? metaData.totalRecords : metaData.totalRecords / 1000 + 'k' : 0}
+            {
+              metaData && metaData.totalRecords
+                ? metaData.totalRecords < 1000
+                  ? metaData.totalRecords
+                  : metaData.totalRecords < 1000000
+                    ? metaData.totalRecords / 1000 + 'k'
+                    : (metaData.totalRecords / 1000000).toFixed(3) + 'M'
+                : 0
+            }
           </span>
         </div>
-        <div className="flex-auto w-auto text-gray-900 p-2">
+        <div className="flex-auto w-auto text-gray-900 p-2 flex flex-wrap items-center justify-center">
           Valid Rows
           <span className="text-xs ml-2 inline-flex items-center font-bold leading-sm uppercase px-3 py-1 bg-green-200 text-gray-600 rounded-full">
             {metaData && typeof metaData.validRecords !== 'undefined'
@@ -135,16 +143,22 @@ const ReviewCsv = ({
               : 'Loading...'}
           </span>
         </div>{' '}
-        <div className="flex-auto w-auto text-red-600 p-2">
+        <div className="flex-auto w-auto text-red-600 p-2 flex flex-wrap items-center justify-center">
           Error Rows
           <span className="text-xs ml-2 inline-flex items-center font-bold leading-sm uppercase px-3 py-1 bg-red-600 text-white rounded-full">
-            {metaData && typeof metaData.validRecords !== 'undefined'
-              ? metaData.totalRecords - metaData.validRecords
-              : 'Loading...'}
+            {
+              metaData && typeof metaData.validRecords !== 'undefined'
+                ? metaData.totalRecords - metaData.validRecords < 1000
+                  ? metaData.totalRecords - metaData.validRecords
+                  : (metaData.totalRecords - metaData.validRecords) < 1000000
+                    ? (metaData.totalRecords - metaData.validRecords) / 1000 + 'k'
+                    : ((metaData.totalRecords - metaData.validRecords) / 1000000).toFixed(3) + 'M'
+                : 'Loading'
+            }
           </span>
         </div>{' '}
         <div className="flex items-center w-auto text-gray-900 mb-1">
-          Only Errors
+          <span className="whitespace-nowrap">Only Errors</span>
           <Switch
             checked={onlyError}
             onChange={handleSwitch}
@@ -161,7 +175,7 @@ const ReviewCsv = ({
             </div>
           </Switch>
         </div>{' '}
-        <div className="flex-auto w-auto">
+        <div className="flex-auto w-auto flex items-center">
           <ErrorTypeDropDown
             errData={metaData}
             selectErrorType={selectErrorType}
@@ -178,7 +192,7 @@ const ReviewCsv = ({
             {loadingSuggestions ? 'Getting suggestions...' : 'Get YoBulkAI Suggestions'}
           </button>}
 
-        <div className="flex justify-end">
+        <div className="flex justify-end items-center">
           {!hideUploaderExtraButtons &&
             <>
               <button
