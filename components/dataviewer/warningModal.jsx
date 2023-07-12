@@ -13,11 +13,9 @@ export default function WarningModal({
     <>
       {isVisible ? (
         <>
-          <div className="absolute justify-center items-center flex overflow-x-hidden inset-0 z-50 outline-none focus:outline-none">
-            <div className="w-96 h-50 my-6 mx-auto">
-              {/*content*/}
-              <div className="border-0 rounded-lg shadow-lg relative flex flex-col w-full h-full bg-white outline-none focus:outline-none">
-                {/*header*/}
+          <div className="absolute overflow-x-hidden z-50 outline-none focus:outline-none w-[25rem] inset-0 m-auto h-fit rounded-lg shadow-xl">
+            <div>
+              <div className="border-0 relative flex flex-col w-full h-full bg-white outline-none focus:outline-none">
                 <div className="flex items-start justify-between p-3 mx-4 border-b border-solid border-slate-200 rounded-t">
                   <h3 className="text-sm font-semibold">
                     You have {metaData.totalRecords - metaData.validRecords}{' '}
@@ -25,7 +23,7 @@ export default function WarningModal({
                   </h3>
                 </div>
                 <div className="flex bg-gray-50">
-                  <div className="flex flex-col mx-4 my-4 w-1/2">
+                  <div className="flex flex-col mx-2 my-4 w-1/2">
                     <div className="flex h-20 text-center text-sm">
                       Review and fix format issues
                     </div>
