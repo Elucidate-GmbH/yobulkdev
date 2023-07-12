@@ -132,7 +132,3 @@ a {
   font-weight: 900;
   z-index: -1; /* this will set it in background so when user click onit you will get cell-click event as if user would normally click on cell */
 }
-
-.ag-body-viewport {
-  overflow: hidden!important;
-}
