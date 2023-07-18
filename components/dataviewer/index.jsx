@@ -510,11 +510,11 @@ const GridExample = ({ version }) => {
   if (taskIsLoading) {
     return (
       <div className='h-screen w-screen relative'>
-        <p className='text-sm text-center'>Please wait while we retrieve the data and insert it into a table. This could take a a few minutes, depending on the size of the file.</p>
+        <p className='text-sm text-center'>Please wait while we retrieve the data and insert it into a table. This could take several minutes, depending on the size of the file.</p>
         <p className='text-sm text-center'>Please do not close the window or the uploader.</p>
         <div className='my-4'>
-          <p className='text-sm text-center'>500mb file - approx 30 seconds</p>
-          <p className='text-sm text-center'>3.5gb file - approx 6 minutes</p>
+          <p className='text-sm text-center'>500mb file - approx 2 minutes</p>
+          <p className='text-sm text-center'>3.5gb file - approx 30-35 minutes</p>
         </div>
         <div className='text-sm flex flex-col items-center justify-center'>
           <p>Elapsed Time:</p>
