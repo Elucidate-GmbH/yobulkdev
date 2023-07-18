@@ -1,13 +1,11 @@
 .loader {
-    width: 80px;
-    height: 80px;
-    border: 6px solid #FFF;
-    border-bottom-color: rgb(30 64 175);;
+    border-style: solid;
+    border-color: transparent;
+    z-index: 999;
     border-radius: 50%;
     display: inline-block;
     box-sizing: border-box;
     animation: rotation 1s linear infinite;
-    position: absolute;
     top: calc(50% - 40px);
     left: calc(50% - 40px);
 }
