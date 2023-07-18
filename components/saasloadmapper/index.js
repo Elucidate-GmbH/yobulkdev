@@ -106,7 +106,7 @@ const SassLoadMapper = () => {
 
     var options = {
       method: 'post',
-      url: `/api/upload?bucketName=${getSaveFileBucketName()}&fileName=${target.name}`,
+      url: '/api/upload',
       headers: {
         'Content-Type': 'multipart/form-data',
         template_id: template_id,
@@ -128,11 +128,6 @@ const SassLoadMapper = () => {
           type: 'SET_TASK_ID',
           payload: res.data.taskId
         });
-
-        window.top.postMessage(
-          { eventType: 'uploadComplete', filePath: res.data?.filePath, documentKey: state.efiData.documentKey },
-          state.efiData.origin
-        );
 
         setTimeout(() => {
           router.push({ pathname: '/dataviewer/saas' }, undefined, {
@@ -375,6 +370,7 @@ const SassLoadMapper = () => {
                   border: 'none',
                 }}
               >
+                <p>loading {loading}</p>
                 <AgGridReact
                   ref={gridRef}
                   columnDefs={columnDefs}

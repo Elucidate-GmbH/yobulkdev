@@ -2,81 +2,32 @@ import Busboy from 'busboy';
 import Papa from 'papaparse';
 import { nameByRace } from 'fantasy-name-generator';
 import { ObjectId } from 'mongodb';
-import stream, { Transform, pipeline } from 'stream';
+import { Transform, pipeline } from 'stream';
 import StreamToMongoDB from '../../../lib/mongostream';
 import clientPromise from '../../../lib/mongodb';
 import { dataValidate, transformer } from './dataValidate';
 import { openCsvInputStream } from './papaStream';
 import { ajvCompileCustomValidator } from '../../../lib/validation_util/yovalidator';
-import fs from 'fs';
-import crypto from 'crypto';
 
-
-let _bucketFilePath = null
-let _bucketName = null
-let _fileName = null;
 let taskId = null;
-function tempDiskFilePath (filename) {
-  return `./tmpFiles/${filename}`;
-}
-function generateRandomString () {
-  return crypto.randomBytes(10).toString('base64').replace(/[=/+]/g, '');
-}
 
-async function saveFile (file, filename, _bucketDestination) {
-  await new Promise(resolve => {
-    if (!fs.existsSync('./tmpFiles')) {
-      fs.mkdirSync('./tmpFiles', { recursive: true });
-    }
-    var fstream = fs.createWriteStream(tempDiskFilePath(filename));
-    file.pipe(fstream);
-    fstream.on('finish', async () => resolve());
-  })
-  await uploadFile(filename, _bucketDestination)
-}
-
-async function uploadFile(filename, _bucketDestination) {
-  const { Storage } = require('@google-cloud/storage');
-  const projectId = process.env.NEXT_PUBLIC_ELU_PROJECT_NAME;
-
-  if (!projectId || !_bucketName) {
-    _bucketFilePath = null
-    await deleteTempFile(filename)
-    return console.log('GCS project id or bucket name was not provided')
-  }
-  const storage = new Storage({ projectId });
-  try {
-    await storage.bucket(_bucketName).upload(tempDiskFilePath(filename), { destination: `${_bucketDestination}${filename}` });
-  }
-  catch (e) {
-    _bucketFilePath = null
-    await deleteTempFile(filename)
-    console.log('copy file to bucket error', e)
-  }
-}
-
-async function deleteTempFile (filename) {
-  fs.unlinkSync(tempDiskFilePath(filename));
-}
 export const config = {
   api: {
-    bodyParser: false,
-  },
+    bodyParser: false
+  }
 };
-const papaOptions = {
-  worker: true,
-  header: true,
-  dynamicTyping: true,
-  skipEmptyLines: true,
-};
+// const papaOptions = {
+//   worker: true,
+//   header: true,
+//   dynamicTyping: true,
+//   skipEmptyLines: true,
+// };
+// const parseStream = Papa.parse(Papa.NODE_STREAM_INPUT, papaOptions);
+
 const dbURL = process.env.MONGODB_URI;
 const dbName = process.env.DATABASE_NAME;
 
 async function processUpload(req) {
-  _bucketName = req.query?.bucketName;
-  const _bucketDestination = `tmp/${generateRandomString()}/`
-  _fileName = req.query?.fileName;
-
   return new Promise(async (resolve, reject) => {
     const busboy = Busboy({
       headers: req.headers,
@@ -86,6 +37,7 @@ async function processUpload(req) {
     });
 
     const collectionName = nameByRace('elf', { gender: 'female' });
+    console.log('collectionName that will be created', collectionName);
     const client = await clientPromise;
     const dbConfig = { dbURL, collectionName, dbName, client, resolve, reject };
     const dbClient = new StreamToMongoDB(dbConfig);
@@ -104,14 +56,12 @@ async function processUpload(req) {
     }
     busboy.on(
       'file',
-      async function (fieldname, file, filename, encoding, mimetype) {
-        _bucketFilePath = '/' + _bucketDestination + _fileName
-        await saveFile(file, _fileName, _bucketDestination)
-        console.log('saved file ', _fileName, ' in ', _bucketFilePath);
-        const readableStream = fs.createReadStream(tempDiskFilePath(_fileName));
+      async function (fieldname, file) {
+        const resp = await db.collection('tasks').insertOne({ status: 'queued' });
+        taskId = resp.insertedId.toString();
 
         pipeline(
-          readableStream,
+          file,
           openCsvInputStream,
           headers_changes,
           datatype_validate,
@@ -119,8 +69,9 @@ async function processUpload(req) {
           async (err) => {
             if (err) console.log('Pipeline failed with an error:', err);
             else {
+              console.log('~~~~~~~~~~~~pipeline finished', taskId);
               try {
-                let result = await db
+                await db
                   .collection('tasks')
                   .updateOne(
                     { _id: ObjectId(taskId) },
@@ -133,7 +84,6 @@ async function processUpload(req) {
                 console.log('error update task to completed');
               }
             }
-            await deleteTempFile(_fileName)
           }
         );
         file.on('end', function () {
@@ -149,9 +99,7 @@ async function processUpload(req) {
       }
     );
     busboy.on('close', async () => {
-      const resp = await db.collection('tasks').insertOne({ status: 'queued' });
-      taskId = resp.insertedId.toString();
-      resolve({ collection_name: collectionName, filePath: _bucketFilePath, taskId: resp.insertedId.toString() });
+      resolve({ collection_name: collectionName, taskId });
     });
     busboy.on('error', err => console.log('Error in busboy:', err));
 
@@ -173,6 +121,7 @@ async function processUpload(req) {
       readableObjectMode: true,
       writableObjectMode: true,
     });
+
     let ajv = ajvCompileCustomValidator({ template: results });
     datatype_validate._transform = function (data, enc, cb) {
       var newdata = dataValidate({ data, colSchema: results, ajv });
