@@ -42,27 +42,7 @@ export default function SuccessModal({ submit, message }) {
               <div className="flex flex-col p-5">
                 <div className="flex flex-col gap-2 items-center h-50 justify-center text-lg text-blue-700">
                   <div className="text-sm font-normal leading-tight text-gray-800 mb-10">
-                    You have successfully imported the records
-                  </div>
-                  <div className="flex gap-10 justify-center mb-10">
-                    <h6 className="text-base flex flex-col gap-3 items-center justify-center font-medium leading-tight text-gray-800">
-                      Submitted
-                      <span className="inline-block py-1.5 px-2.5 leading-none text-center whitespace-nowrap align-baseline font-bold bg-white-300 text-blue rounded">
-                        {message.totalRecords}
-                      </span>
-                    </h6>
-                    <h6 className="text-base flex flex-col gap-3 items-center justify-center font-medium leading-tight text-gray-800">
-                      Accepted
-                      <span className="inline-block py-1.5 px-2.5 leading-none text-center whitespace-nowrap align-baseline font-bold bg-blue-500 text-white rounded">
-                        {message.validRecords}
-                      </span>
-                    </h6>
-                    <h6 className="text-base flex flex-col gap-3 items-center justify-center font-medium leading-tight text-gray-800">
-                      Rejected
-                      <span className="inline-block py-1.5 px-2.5 leading-none text-center whitespace-nowrap align-baseline font-bold bg-red-500 text-white rounded">
-                        {message.totalRecords - message.validRecords}
-                      </span>
-                    </h6>
+                    You have successfully uploaded the file
                   </div>
                 </div>
                 <Button
