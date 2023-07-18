@@ -12,6 +12,8 @@ import AutoFixModal from './AutoFixModal';
 import { Context } from '../../context';
 import Button from '../efi/Button';
 import { ButtonTypes } from '../efi/ButtonTypes';
+import { getSaveFileBucketName } from '../../lib/efi-store';
+import Spinner from '../efi/Spinner';
 
 const ReviewCsv = ({
   collectionName,
@@ -88,30 +90,94 @@ const ReviewCsv = ({
     [showWarning]
   );
 
-  const onBtnSubmit = useCallback(() => {
+  async function saveFileToBucket () {
+    var options = {
+      method: 'GET',
+      url: `/api/save?bucketName=${getSaveFileBucketName()}&fileName=${fileName}`,
+      headers: {
+        collection_name: collectionName,
+      },
+    };
+    const { data } = await axios(options)
+    return data
+  }
+
+  function dropCollection () {
+    var options = {
+      method: 'GET',
+      url: `/api/drop`,
+      headers: {
+        collection_name: collectionName,
+      },
+    };
+    axios(options);
+  }
+
+  function uploadCompleteEvent (filePath) {
+    dropCollection();
+    window.top.postMessage(
+      { eventType: 'uploadComplete', filePath, documentKey: state.efiData.documentKey },
+      state.efiData.origin
+    );
+  }
+
+  const [loading, setLoading] = useState(false);
+  const [loading2, setLoading2] = useState(false);
+  const onBtnSubmit = useCallback(async () => {
     if (showWarning) {
-      setWarningModalVisible(true);
-      return;
+      return setWarningModalVisible(true);
     } else {
-      setShowResultModal(true);
-      return;
+      try {
+        setLoading(true);
+        const data = await saveFileToBucket();
+        uploadCompleteEvent(data.filePath);
+      }
+      catch (e) {
+        console.log('save file to bucket error', e);
+      }
+      finally {
+        setLoading(false);
+        setShowResultModal(true);
+      }
     }
   }, [showWarning]);
 
-  const submitFirstModal = () => {
-    setWarningModalVisible(false);
-    setShowResultModal(true);
+  const submitFirstModal = async () => {
+    try {
+      setLoading2(true);
+      const data = await saveFileToBucket();
+      uploadCompleteEvent(data.filePath);
+    }
+    catch (e) {
+      console.log('save file to bucket error', e);
+    }
+    finally {
+      setLoading2(false);
+      setWarningModalVisible(false);
+      setShowResultModal(true);
+    }
   };
 
-  const onFinalSubmit = () => {
+  const onFinalSubmit = async () => {
+    var options = {
+      method: 'GET',
+      url: `/api/save?bucketName=${getSaveFileBucketName()}&fileName=${fileName}`,
+      headers: {
+        collection_name: collectionName,
+      },
+    };
+    await axios(options)
+
     setTimeout(() => {
       window.top.postMessage(
         { eventType: "closeImporter", documentKey: state.efiData.documentKey },
         state.efiData.origin
       )
-    }, 500)
+    }, 500);
+
     setShowResultModal(false);
   };
+
 
   const handleSwitch = () => {
     setOnlyError(!onlyError);
@@ -251,7 +317,8 @@ const ReviewCsv = ({
             type={ButtonTypes.primary}
             customStyle={{ marginLeft: '10px' }}
           >
-            Submit
+            <span className={loading ? 'mr-4' : null}>Submit</span>
+            {loading && <Spinner height='24px' width='24px' position='unset' borderWidth='3px' color='white' />}
           </Button>
         </div>
 
@@ -272,6 +339,7 @@ const ReviewCsv = ({
           submit={submitFirstModal}
           metaData={fileMetaData}
           type="Submit"
+          loading={loading2}
         />
       </div>
     </div>
