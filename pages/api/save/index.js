@@ -21,8 +21,8 @@ export default async function downloadFile(req, res) {
       if (!req.query?.fileName) {
         return res.status(400).json({ error: 'fileName is missing' });
       }
-      if (!req.headers.collection_name) {
-        return res.status(400).json({ error: 'collection_name is missing' });
+      if (!req?.query?.collectionName) {
+        return res.status(400).json({ error: 'collectionName is missing' });
       }
 
       const client = await clientPromise;
@@ -34,15 +34,13 @@ export default async function downloadFile(req, res) {
       const file = storage.bucket(bucketName).file(bucketFileDestination);
 
       let uploadError = null;
-
       try {
         let count = 0;
-        let collection = await db.collection(req.headers.collection_name);
+        let collection = await db.collection(req.query.collectionName);
         var stream = await collection
           .find({})
           .project({ _id: 0, validationData: 0, _corrections: 0, _old: 0 })
           .stream();
-
         let header = true;
         const csvStream = file.createWriteStream({ resumable: false });
 

@@ -32,10 +32,7 @@ const SaasLoader = ({ templateId }) => {
       getTemplates();
     }
 
-    if (!isInIframe) {
-      console.log('not inside an iframe');
-      getTemplates();
-    }
+    if (!isInIframe) getTemplates();
 
     function getTemplates () {
       axios

@@ -37,7 +37,6 @@ async function processUpload(req) {
     });
 
     const collectionName = nameByRace('elf', { gender: 'female' });
-    console.log('collectionName that will be created', collectionName);
     const client = await clientPromise;
     const dbConfig = { dbURL, collectionName, dbName, client, resolve, reject };
     const dbClient = new StreamToMongoDB(dbConfig);
@@ -67,9 +66,8 @@ async function processUpload(req) {
           datatype_validate,
           dbClient.stream,
           async (err) => {
-            if (err) console.log('Pipeline failed with an error:', err);
+            if (err) console.log('Upload file pipeline failed with an error:', err);
             else {
-              console.log('~~~~~~~~~~~~pipeline finished', taskId);
               try {
                 await db
                   .collection('tasks')
@@ -78,10 +76,9 @@ async function processUpload(req) {
                     { $set: { 'status': 'completed' } },
                     { upsert: false }
                   );
-                console.log('Pipeline ended successfully');
               }
               catch (e) {
-                console.log('error update task to completed');
+                console.log('error update task to completed', e);
               }
             }
           }
@@ -93,15 +90,14 @@ async function processUpload(req) {
               { $set: { collection_name: collectionName } },
               { upsert: true }
             )
-            .then((result, err) => console.log('file finished inserting in db'))
-            .catch((err) => console.log('file on end error ', err))
+            .then(() => console.log('file finished inserting in db'))
+            .catch((err) => console.log('upload file on end error ', err))
         });
       }
     );
     busboy.on('close', async () => {
       resolve({ collection_name: collectionName, taskId });
     });
-    busboy.on('error', err => console.log('Error in busboy:', err));
 
     var headers_changes = new Transform({
       readableObjectMode: true,

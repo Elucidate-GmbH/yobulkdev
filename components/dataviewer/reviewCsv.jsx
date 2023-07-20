@@ -93,10 +93,7 @@ const ReviewCsv = ({
   async function saveFileToBucket () {
     var options = {
       method: 'GET',
-      url: `/api/save?bucketName=${getSaveFileBucketName()}&fileName=${fileName}`,
-      headers: {
-        collection_name: collectionName,
-      },
+      url: `/api/save?bucketName=${getSaveFileBucketName()}&fileName=${fileName}&collectionName=${collectionName}`
     };
     const { data } = await axios(options)
     return data
@@ -105,10 +102,7 @@ const ReviewCsv = ({
   function dropCollection () {
     var options = {
       method: 'GET',
-      url: `/api/drop`,
-      headers: {
-        collection_name: collectionName,
-      },
+      url: `/api/drop?collectionName=${collectionName}`
     };
     axios(options);
   }
@@ -161,10 +155,7 @@ const ReviewCsv = ({
   const onFinalSubmit = async () => {
     var options = {
       method: 'GET',
-      url: `/api/save?bucketName=${getSaveFileBucketName()}&fileName=${fileName}`,
-      headers: {
-        collection_name: collectionName,
-      },
+      url: `/api/save?bucketName=${getSaveFileBucketName()}&fileName=${fileName}&collectionName=${collectionName}`,
     };
     await axios(options)
 

@@ -3,7 +3,6 @@ import { ObjectId } from 'mongodb';
 
 var intervalId;
 export default async function taskStatus(req, res) {
-  console.log('New request received:', req.method, req.url);
   const client = await clientPromise;
   const db = client.db(process.env.DATABASE_NAME | 'yobulk');
 
